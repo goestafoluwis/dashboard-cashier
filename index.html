@@ -10,44 +10,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- PapaParse for CSV Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        /* Font khusus untuk menyamarkan input seperti password tanpa pemicu Chrome Password Manager */
-        .secure-input {
-            -webkit-text-security: disc;
-            font-family: monospace;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-    <!-- Modal Access PIN -->
-    <div id="loginModal" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
-            <div class="mb-4 text-indigo-600">
-                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                </svg>
-            </div>
-            <h2 class="text-xl font-bold text-gray-800 mb-1">Akses Dashboard</h2>
-            <p class="text-xs text-gray-500 mb-6">Masukkan Kode Akses (Guest / Admin)</p>
-            
-            <div class="space-y-3">
-                <input type="text" id="inputPIN" placeholder="Masukkan PIN / Kode Akses" 
-                       class="secure-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center text-sm" 
-                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                       onkeypress="handleKeyPress(event)">
-                
-                <p id="errorMessage" class="text-red-500 text-xs hidden">Kode akses salah! Coba lagi.</p>
-                
-                <button type="button" onclick="verifyAccess()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg transition duration-200 text-sm">
-                    Masuk Dashboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Dashboard Content (Hidden by Default) -->
-    <div id="dashboardContent" class="hidden">
+    <!-- Main Dashboard Content -->
+    <div id="dashboardContent">
         <!-- Header -->
         <header class="bg-indigo-700 text-white p-6 shadow-md">
             <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
@@ -71,9 +38,9 @@
                         📊 Buka Database (Sheet)
                     </a>
 
-                    <!-- Tombol Keluar -->
-                    <button type="button" onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs">
-                        Keluar
+                    <!-- Tombol Ganti Akses -->
+                    <button type="button" onclick="loginPrompt()" class="bg-indigo-900 hover:bg-indigo-950 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs">
+                        🔑 Switch Access
                     </button>
                 </div>
             </div>
@@ -160,48 +127,45 @@
     </div>
 
     <script>
-        // --- KONFIGURASI KODE AKSES ---
-        const GUEST_PIN = "guest123";  // Kode Akses Tamu
-        const ADMIN_PIN = "admin123";  // Kode Akses Admin
+        // --- KATA SANDI ---
+        const GUEST_PIN = "guest";
+        const ADMIN_PIN = "admin";
 
-        // --- KONFIGURASI LINK (Hanya Admin) ---
-        const GOOGLE_FORM_URL = https://docs.google.com/forms/d/e/1FAIpQLSefNqJnXC9d0JpY_hSgQfL9u0nX5Scjeova__8Vfq7LLNcWRA/viewform?usp=dialog = "https://forms.google.com/YOUR_FORM_URL"; 
-        const GOOGLE_SHEET_DATABASE_URL = https://docs.google.com/spreadsheets/d/1q1a3yXAF-WP5TKZ6EkkMzY6ZKuk7gW1CidryBFebFRU/edit?resourcekey=&gid=1559517639#gid=1559517639 = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID"; 
-        const GOOGLE_SHEET_CSV_URL = https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pubhtml ;
+        // --- KONFIGURASI LINK DATA ---
+        const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSefNqJnXC9d0JpY_hSgQfL9u0nX5Scjeova__8Vfq7LLNcWRA/viewform?usp=dialog"; 
+        const GOOGLE_SHEET_DATABASE_URL = "https://docs.google.com/spreadsheets/d/1q1a3yXAF-WP5TKZ6EkkMzY6ZKuk7gW1CidryBFebFRU/edit?resourcekey=&gid=1559517639#gid=1559517639"; 
+        
+        // Link CSV Pubhtml Google Sheet
+        const rawCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pubhtml";
+        const GOOGLE_SHEET_CSV_URL = rawCsvUrl.replace('/pubhtml', '/pub?output=csv');
 
-        // Cek Sesi Login saat Pertama Buka Web
         window.onload = function() {
-            const userRole = sessionStorage.getItem("userRole");
-            if (userRole === "admin" || userRole === "guest") {
-                showDashboard(userRole);
+            let role = sessionStorage.getItem("userRole");
+            if (!role) {
+                loginPrompt();
+            } else {
+                applyRolePermissions(role);
+                initDashboard();
             }
         };
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') {
-                verifyAccess();
-            }
-        }
-
-        function verifyAccess() {
-            const inputVal = document.getElementById("inputPIN").value.trim();
-            const errorMsg = document.getElementById("errorMessage");
-
-            if (inputVal === ADMIN_PIN) {
+        function loginPrompt() {
+            let inputPin = prompt("Masukkan Kata Sandi (guest / admin):");
+            if (inputPin === ADMIN_PIN) {
                 sessionStorage.setItem("userRole", "admin");
-                showDashboard("admin");
-            } else if (inputVal === GUEST_PIN) {
+                applyRolePermissions("admin");
+            } else if (inputPin === GUEST_PIN) {
                 sessionStorage.setItem("userRole", "guest");
-                showDashboard("guest");
+                applyRolePermissions("guest");
             } else {
-                errorMsg.classList.remove("hidden");
+                alert("Kata sandi salah/kosong. Otomatis masuk sebagai Guest.");
+                sessionStorage.setItem("userRole", "guest");
+                applyRolePermissions("guest");
             }
+            initDashboard();
         }
 
-        function showDashboard(role) {
-            document.getElementById("loginModal").classList.add("hidden");
-            document.getElementById("dashboardContent").classList.remove("hidden");
-            
+        function applyRolePermissions(role) {
             const badge = document.getElementById("roleBadge");
             const btnForm = document.getElementById("linkGoogleForm");
             const btnSheet = document.getElementById("linkDatabaseSheet");
@@ -209,7 +173,6 @@
             if (role === "admin") {
                 badge.textContent = "Admin";
                 badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-green-500 text-white";
-                
                 btnForm.href = GOOGLE_FORM_URL;
                 btnSheet.href = GOOGLE_SHEET_DATABASE_URL;
                 btnForm.classList.remove("hidden");
@@ -217,66 +180,56 @@
             } else {
                 badge.textContent = "Guest";
                 badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900 text-indigo-200";
-                
                 btnForm.classList.add("hidden");
                 btnSheet.classList.add("hidden");
             }
-
-            initDashboard();
         }
-
-        function logout() {
-            sessionStorage.clear();
-            // Buka URL bersih tanpa query string
-            window.location.href = window.location.pathname;
-        }
-
-        // --- DASHBOARD LOGIC ---
-        const sampleData = [
-            { timestamp: '2026-07-01', nik: '1001', nama: 'Budi Santoso', toko: 'Toko Mawar', kategori: 'A', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 150, tx: 50, targetUpt: 2.5 },
-            { timestamp: '2026-07-02', nik: '1002', nama: 'Siti Aminah', toko: 'Toko Melati', kategori: 'B', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 220, tx: 80, targetUpt: 2.5 },
-            { timestamp: '2026-07-03', nik: '1003', nama: 'Eko Prasetyo', toko: 'Toko Mawar', kategori: 'A', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 80, tx: 60, targetUpt: 2.5 },
-            { timestamp: '2026-07-04', nik: '1004', nama: 'Dewi Lestari', toko: 'Toko Anggrek', kategori: 'C', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 310, tx: 90, targetUpt: 3.0 },
-            { timestamp: '2026-07-05', nik: '1005', nama: 'Rian Hidayat', toko: 'Toko Melati', kategori: 'B', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 45, tx: 40, targetUpt: 2.5 },
-            { timestamp: '2026-07-06', nik: '1006', nama: 'Ayu Kartika', toko: 'Toko Anggrek', kategori: 'C', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 190, tx: 50, targetUpt: 3.0 }
-        ];
 
         let rawData = [];
         let topChartInstance = null;
         let bottomChartInstance = null;
 
         function initDashboard() {
-            if (GOOGLE_SHEET_CSV_URL === "DUMMY_DATA") {
-                rawData = sampleData;
-                populateFilters();
-                renderDashboard();
-            } else {
-                Papa.parse(GOOGLE_SHEET_CSV_URL, {
-                    download: true,
-                    header: true,
-                    complete: function(results) {
-                        rawData = processSheetData(results.data);
-                        populateFilters();
-                        renderDashboard();
-                    }
-                });
-            }
+            Papa.parse(GOOGLE_SHEET_CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    rawData = processSheetData(results.data);
+                    populateFilters();
+                    renderDashboard();
+                },
+                error: function(err) {
+                    console.error("Gagal membaca CSV:", err);
+                }
+            });
         }
 
         function processSheetData(data) {
-            return data.map(item => ({
-                timestamp: item['Timestamp'] || item['Tanggal'] || '',
-                nik: item['NIK'] || '',
-                nama: item['Nama Karyawan'] || '',
-                toko: item['Nama Toko'] || '',
-                kategori: item['Kategori Grup Toko'] || 'Umum',
-                abm: item['ABM'] || '-',
-                bm: item['BM'] || '-',
-                shift: item['Shift'] || '-',
-                qty: parseFloat(item['Total Qty Sold'] || 0),
-                tx: parseFloat(item['Total Transaksi'] || 0),
-                targetUpt: parseFloat(item['Target UPT'] || 2.5)
-            }));
+            return data.map(item => {
+                const keys = Object.keys(item);
+                const getItem = (possibleNames) => {
+                    for (let p of possibleNames) {
+                        for (let k of keys) {
+                            if (k.trim().toLowerCase() === p.toLowerCase()) return item[k];
+                        }
+                    }
+                    return '';
+                };
+
+                return {
+                    timestamp: getItem(['Timestamp', 'Tanggal', 'Waktu']),
+                    nik: getItem(['NIK', 'ID Staff', 'Nomor Induk']),
+                    nama: getItem(['Nama Staff', 'Nama Karyawan', 'Nama Kasir', 'Nama']),
+                    toko: getItem(['Nama Toko', 'Toko', 'Cabang']),
+                    kategori: getItem(['Kategori Grup Toko', 'Kategori Toko', 'Kategori']) || 'Umum',
+                    abm: getItem(['ABM', 'Asst. Branch Manager', 'Asst Branch Manager']) || '-',
+                    bm: getItem(['BM', 'Branch Manager']) || '-',
+                    shift: getItem(['Shift', 'Jam Kerja']) || '-',
+                    qty: parseFloat(getItem(['Qty Sold', 'Total Qty Sold', 'Qty', 'Jumlah Qty']) || 0),
+                    tx: parseFloat(getItem(['Transaksi', 'Total Transaksi', 'Jumlah Transaksi', 'Tx']) || 0),
+                    targetUpt: parseFloat(getItem(['Target UPT', 'Target']) || 2.5)
+                };
+            }).filter(d => d.nama || d.nik || d.toko);
         }
 
         function populateFilters() {
