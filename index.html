@@ -583,6 +583,7 @@
             if (topChartInstance) topChartInstance.destroy();
             if (bottomChartInstance) bottomChartInstance.destroy();
 
+            // TOP 3 STAFF CHART (Green Pastel Translucent)
             const ctxTop = document.getElementById('topChart').getContext('2d');
             topChartInstance = new Chart(ctxTop, {
                 type: 'bar',
@@ -591,15 +592,18 @@
                     datasets: [{
                         label: 'Rata-rata UPT',
                         data: top3.map(d => d.avgUpt.toFixed(2)),
-                        backgroundColor: '#48d1cc', // Hijau Mint Original
-                        borderRadius: 6
+                        backgroundColor: 'rgba(72, 209, 204, 0.45)', // Hijau Mint Soft Transparan
+                        borderColor: 'rgba(56, 178, 172, 1)',         // Border Hijau Tegas
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        barPercentage: 0.55
                     }]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
                     layout: { padding: { top: 25 } },
-                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } } },
                     plugins: {
                         legend: { display: false },
                         datalabels: {
@@ -613,6 +617,7 @@
                 }
             });
 
+            // BOTTOM 3 STAFF CHART (Red Pastel Translucent)
             const ctxBottom = document.getElementById('bottomChart').getContext('2d');
             bottomChartInstance = new Chart(ctxBottom, {
                 type: 'bar',
@@ -621,15 +626,18 @@
                     datasets: [{
                         label: 'Rata-rata UPT',
                         data: bottom3.map(d => d.avgUpt.toFixed(2)),
-                        backgroundColor: '#ff6b6b', // Merah Coral Original
-                        borderRadius: 6
+                        backgroundColor: 'rgba(255, 107, 107, 0.45)', // Merah Coral Soft Transparan
+                        borderColor: 'rgba(239, 68, 68, 1)',          // Border Merah Tegas
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        barPercentage: 0.55
                     }]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
                     layout: { padding: { top: 25 } },
-                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true } },
+                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } } },
                     plugins: {
                         legend: { display: false },
                         datalabels: {
@@ -643,7 +651,6 @@
                 }
             });
         }
-
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
