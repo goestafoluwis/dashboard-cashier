@@ -19,25 +19,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <style>
-        /* CSS Watermark Panda MR.D.I.Y. Baru */
-        body::before {
-            content: "";
+        /* CSS Watermark Panda MR.D.I.Y. Menggunakan Elemen Img */
+        .watermark-panda {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 75vw;
-            height: 75vh;
-            background-image: url('https://files.catbox.moe/ed4kxk.png'); 
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
+            width: 70vw;
+            max-width: 650px;
+            height: auto;
             opacity: 0.12;
             pointer-events: none;
             z-index: 0;
             transition: opacity 0.3s ease;
         }
-        .dark body::before {
+        .dark .watermark-panda {
             opacity: 0.08;
         }
 
@@ -88,6 +84,9 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
 
+    <!-- ELEMEN WATERMARK PANDA (Direct Tag dengan ReferrerPolicy) -->
+    <img src="https://files.catbox.moe/ed4kxk.png" alt="Watermark" class="watermark-panda" referrerpolicy="no-referrer" />
+
     <div id="dashboardContent" class="pb-12">
         <!-- HEADER NAVBAR -->
         <header class="custom-header text-white px-6 py-5 mb-6">
@@ -129,7 +128,7 @@
         <main class="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
 
             <!-- SLICERS / FILTER BAR -->
-            <div class="bg-white dark:bg-slate-800/90 backdrop-blur-md p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Bulan & Tahun</label>
                     <input type="month" id="filterBulanTahun" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -156,7 +155,7 @@
 
             <!-- KPI SUMMARY CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="kpi-card bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
+                <div class="kpi-card bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Qty Sold</p>
                         <h3 id="totalQty" class="text-3xl font-extrabold mt-1">0</h3>
@@ -164,7 +163,7 @@
                     <div class="p-3 bg-pink-50 dark:bg-pink-950/40 rounded-xl text-xl">🛍️</div>
                 </div>
 
-                <div class="kpi-card bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
+                <div class="kpi-card bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Transaksi</p>
                         <h3 id="totalTx" class="text-3xl font-extrabold mt-1">0</h3>
@@ -172,7 +171,7 @@
                     <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-xl">💳</div>
                 </div>
 
-                <div class="kpi-card bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
+                <div class="kpi-card bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata UPT Capaian</p>
                         <h3 id="avgUPT" class="text-3xl font-extrabold mt-1 text-indigo-600 dark:text-indigo-400">0.00</h3>
@@ -182,7 +181,7 @@
             </div>
 
             <!-- PERFORMA PER TOKO CHART & TABLE -->
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="font-bold text-base flex items-center gap-2">
                         <span>🏬</span> Performa UPT Per Toko vs Target Level 1
@@ -195,7 +194,7 @@
                 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-100 dark:bg-slate-700/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
+                        <thead class="bg-slate-100/80 dark:bg-slate-700/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
                             <tr>
                                 <th class="p-3">Nama Toko</th>
                                 <th class="p-3 text-right">Total Qty Sold</th>
@@ -213,14 +212,14 @@
 
             <!-- DUA GRAFIK MINI (TOP & BOTTOM STAFF) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <h2 class="font-bold text-sm text-emerald-600 dark:text-emerald-400 mb-3 flex items-center gap-2">
                         <span>🏆</span> Top 3 Staff (Rata-rata UPT)
                     </h2>
                     <div class="relative h-56"><canvas id="topChart"></canvas></div>
                 </div>
 
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <h2 class="font-bold text-sm text-rose-500 mb-3 flex items-center gap-2">
                         <span>⚠️</span> Bottom 3 Staff (Rata-rata UPT)
                     </h2>
@@ -229,13 +228,13 @@
             </div>
 
             <!-- TABEL RINCIAN KASIR -->
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden p-5">
+            <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden p-5">
                 <h2 class="font-bold text-base mb-4 flex items-center gap-2">
                     <span>📋</span> Rincian Performa Kasir
                 </h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-100 dark:bg-slate-700/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
+                        <thead class="bg-slate-100/80 dark:bg-slate-700/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
                             <tr>
                                 <th class="p-3">Waktu Input</th>
                                 <th class="p-3">Nama Staff</th>
@@ -258,7 +257,6 @@
     </div>
 
     <script>
-        // Register DataLabels Plugin
         Chart.register(ChartDataLabels);
 
         const GUEST_PIN = "guest";
