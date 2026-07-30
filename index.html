@@ -88,7 +88,34 @@
                 </div>
             </div>
 
-            <!-- Charts Section -->
+            <!-- Performa Per Toko vs Target Level 1 Section -->
+            <div class="bg-white p-5 rounded-lg shadow-md mb-6">
+                <h2 class="text-lg font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                    🏪 Performa UPT Per Toko vs Target Level 1
+                </h2>
+                <div class="relative h-72 mb-6">
+                    <canvas id="storeChart"></canvas>
+                </div>
+                
+                <!-- Ringkasan Performa Per Toko -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-indigo-700 uppercase">Nama Toko</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">Total Qty Sold</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">Total Transaksi</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">UPT Actual Toko</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">Target Level 1</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-indigo-700 uppercase">% Capaian Toko</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storeTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Charts Staff Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div class="bg-white p-5 rounded-lg shadow-md">
                     <h2 class="text-lg font-bold text-green-700 mb-4 flex items-center">🏆 Top 3 Staff (Rata-rata UPT)</h2>
@@ -185,6 +212,7 @@
         }
 
         let rawData = [];
+        let storeChartInstance = null;
         let topChartInstance = null;
         let bottomChartInstance = null;
 
@@ -309,7 +337,32 @@
             document.getElementById('totalTx').textContent = totalTx.toLocaleString('id-ID');
             document.getElementById('avgUPT').textContent = avgUPT.toFixed(2);
 
-            // AGREGASI PER STAFF
+            // 1. AGREGASI DATA PER TOKO
+            const storeGroup = {};
+            processed.forEach(d => {
+                if (!storeGroup[d.toko]) {
+                    storeGroup[d.toko] = {
+                        toko: d.toko,
+                        totalQty: 0,
+                        totalTx: 0,
+                        targetLvl1: d.targetUpt
+                    };
+                }
+                storeGroup[d.toko].totalQty += d.qty;
+                storeGroup[d.toko].totalTx += d.tx;
+            });
+
+            const aggregatedStores = Object.values(storeGroup).map(s => {
+                const uptActual = s.totalTx > 0 ? (s.totalQty / s.totalTx) : 0;
+                const pctCapaian = s.targetLvl1 > 0 ? ((uptActual / s.targetLvl1) * 100) : 0;
+                return {
+                    ...s,
+                    uptActual,
+                    pctCapaian
+                };
+            });
+
+            // 2. AGREGASI DATA PER STAFF (UNTUK TOP & BOTTOM CHART)
             const staffGroup = {};
             processed.forEach(d => {
                 if (!staffGroup[d.nama]) {
@@ -339,26 +392,90 @@
             const top3 = sortedStaff.slice(0, 3);
             const bottom3 = sortedStaff.slice(-3).reverse();
 
-            renderCharts(top3, bottom3);
+            // Render komponen
+            renderStorePerformance(aggregatedStores);
+            renderStaffCharts(top3, bottom3);
             renderTable(processed);
         }
 
-        function renderCharts(top3, bottom3) {
+        function renderStorePerformance(storesData) {
+            if (storeChartInstance) storeChartInstance.destroy();
+
+            const labels = storesData.map(s => s.toko);
+            const actualData = storesData.map(s => s.uptActual.toFixed(2));
+            const targetData = storesData.map(s => s.targetLvl1.toFixed(2));
+
+            const ctxStore = document.getElementById('storeChart').getContext('2d');
+            storeChartInstance = new Chart(ctxStore, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'UPT Actual Toko',
+                            data: actualData,
+                            backgroundColor: 'rgba(79, 70, 229, 0.85)', // Indigo
+                            borderColor: 'rgb(79, 70, 229)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Target Level 1',
+                            data: targetData,
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)', // Amber/Orange
+                            borderColor: 'rgb(245, 158, 11)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 25 } },
+                    scales: { y: { beginAtZero: true } },
+                    plugins: {
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 2,
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (val) => parseFloat(val).toFixed(2)
+                        }
+                    }
+                }
+            });
+
+            // Render Tabel Toko
+            const tbody = document.getElementById('storeTableBody');
+            tbody.innerHTML = '';
+            storesData.forEach(s => {
+                const tr = document.createElement('tr');
+                const isAchieved = s.pctCapaian >= 100;
+                tr.innerHTML = `
+                    <td class="px-4 py-2 font-bold text-gray-800">${s.toko}</td>
+                    <td class="px-4 py-2 text-right">${s.totalQty.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-2 text-right">${s.totalTx.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-2 text-right font-bold text-indigo-600">${s.uptActual.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right text-gray-600">${s.targetLvl1.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAchieved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${s.pctCapaian.toFixed(1)}%
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderStaffCharts(top3, bottom3) {
             if (topChartInstance) topChartInstance.destroy();
             if (bottomChartInstance) bottomChartInstance.destroy();
 
-            // Opsi Tampilan Label Angka di Atas Bar
             const datalabelsOption = {
                 anchor: 'end',
                 align: 'end',
                 offset: 2,
-                font: {
-                    weight: 'bold',
-                    size: 12
-                },
-                formatter: function(value) {
-                    return parseFloat(value).toFixed(2);
-                }
+                font: { weight: 'bold', size: 12 },
+                formatter: (val) => parseFloat(val).toFixed(2)
             };
 
             const ctxTop = document.getElementById('topChart').getContext('2d');
@@ -377,10 +494,10 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    layout: { padding: { top: 25 } }, // Memberikan ruang di atas bar agar angka tidak terpotong
+                    layout: { padding: { top: 25 } },
                     scales: { y: { beginAtZero: true } },
                     plugins: {
-                        datalabels: { ...datalabelsOption, color: '#15803d' } // Warna hijau tebal
+                        datalabels: { ...datalabelsOption, color: '#15803d' }
                     }
                 }
             });
@@ -401,10 +518,10 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    layout: { padding: { top: 25 } }, // Memberikan ruang di atas bar agar angka tidak terpotong
+                    layout: { padding: { top: 25 } },
                     scales: { y: { beginAtZero: true } },
                     plugins: {
-                        datalabels: { ...datalabelsOption, color: '#b91c1c' } // Warna merah tebal
+                        datalabels: { ...datalabelsOption, color: '#b91c1c' }
                     }
                 }
             });
