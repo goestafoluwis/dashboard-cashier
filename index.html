@@ -105,7 +105,7 @@
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIK / ID</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Waktu Input</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Staff</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Toko</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
@@ -195,6 +195,22 @@
             });
         }
 
+        // Parse Timestamp ("7/30/2026 23:51:55") ke format Year-Month
+        function parseTimestamp(tsStr) {
+            if (!tsStr) return { raw: '-', monthYear: '' };
+            
+            let d = new Date(tsStr);
+            if (!isNaN(d.getTime())) {
+                let yyyy = d.getFullYear();
+                let mm = String(d.getMonth() + 1).padStart(2, '0');
+                return {
+                    raw: tsStr,
+                    monthYear: `${yyyy}-${mm}`
+                };
+            }
+            return { raw: tsStr, monthYear: '' };
+        }
+
         function processSheetData(data) {
             return data.map(item => {
                 const keys = Object.keys(item);
@@ -207,6 +223,9 @@
                     return '';
                 };
 
+                const rawTs = getItem(['Timestamp', 'Tanggal', 'Waktu']);
+                const parsedTs = parseTimestamp(rawTs);
+
                 const qtyVal = parseFloat(getItem(['Total Qty Sold', 'Qty Sold', 'Qty']) || 0);
                 const txVal = parseFloat(getItem(['Total Transaksi', 'Transaksi', 'Tx']) || 0);
                 
@@ -215,13 +234,10 @@
                 
                 // Kolom I = Target Base UPT
                 const targetBaseVal = parseFloat(getItem(['Target Base UPT', 'Target Base', 'Target UPT']) || 3.84);
-                
-                // Kolom M = Achievement % (jika ada nilai persen dari sheet, atau dihitung ulang)
-                const achVal = parseFloat(getItem(['Achievement %', 'Achievement', 'Capaian %']) || 0);
 
                 return {
-                    timestamp: getItem(['Timestamp', 'Tanggal']),
-                    nik: getItem(['NIK', 'ID Staff']) || '-',
+                    timestamp: parsedTs.raw,
+                    monthYear: parsedTs.monthYear,
                     nama: getItem(['Nama Kasir', 'Nama Staff', 'Nama Karyawan', 'Nama']) || 'Kasir',
                     toko: getItem(['Nama Toko', 'Toko', 'Cabang']) || 'Toko',
                     kategori: getItem(['Kategori Grup Toko', 'Kategori Toko', 'Kategori']) || 'Umum',
@@ -231,8 +247,7 @@
                     qty: qtyVal,
                     tx: txVal,
                     upt: uptVal,
-                    targetUpt: targetBaseVal,
-                    achievementSheet: achVal
+                    targetUpt: targetBaseVal
                 };
             }).filter(d => d.qty > 0 || d.tx > 0 || d.nama !== 'Kasir');
         }
@@ -272,8 +287,8 @@
 
             const filtered = rawData.filter(d => {
                 let matchDate = true;
-                if (bulanTahun && d.timestamp) {
-                    matchDate = d.timestamp.startsWith(bulanTahun);
+                if (bulanTahun && d.monthYear) {
+                    matchDate = (d.monthYear === bulanTahun);
                 }
                 const matchKat = !kat || d.kategori === kat;
                 const matchAbm = !abm || d.abm === abm;
@@ -347,7 +362,7 @@
                 const tr = document.createElement('tr');
                 const isAchieved = d.pct >= 100;
                 tr.innerHTML = `
-                    <td class="px-4 py-2 font-mono text-xs">${d.nik}</td>
+                    <td class="px-4 py-2 font-mono text-xs text-gray-500">${d.timestamp}</td>
                     <td class="px-4 py-2 font-medium text-gray-900">${d.nama}</td>
                     <td class="px-4 py-2">${d.toko}</td>
                     <td class="px-4 py-2">${d.shift}</td>
