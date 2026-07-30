@@ -362,7 +362,7 @@
                 };
             });
 
-            // 2. AGREGASI DATA PER STAFF (UNTUK TOP & BOTTOM CHART)
+            // 2. AGREGASI DATA PER STAFF (TOP & BOTTOM)
             const staffGroup = {};
             processed.forEach(d => {
                 if (!staffGroup[d.nama]) {
@@ -392,7 +392,7 @@
             const top3 = sortedStaff.slice(0, 3);
             const bottom3 = sortedStaff.slice(-3).reverse();
 
-            // Render komponen
+            // Render
             renderStorePerformance(aggregatedStores);
             renderStaffCharts(top3, bottom3);
             renderTable(processed);
@@ -414,14 +414,14 @@
                         {
                             label: 'UPT Actual Toko',
                             data: actualData,
-                            backgroundColor: 'rgba(79, 70, 229, 0.85)', // Indigo
+                            backgroundColor: 'rgba(79, 70, 229, 0.85)',
                             borderColor: 'rgb(79, 70, 229)',
                             borderWidth: 1
                         },
                         {
                             label: 'Target Level 1',
                             data: targetData,
-                            backgroundColor: 'rgba(245, 158, 11, 0.85)', // Amber/Orange
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)',
                             borderColor: 'rgb(245, 158, 11)',
                             borderWidth: 1
                         }
@@ -430,15 +430,39 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 25 } },
+                    layout: { padding: { top: 30 } }, // Beri ruang ekstra untuk teks Achieve / Not Achieve
                     scales: { y: { beginAtZero: true } },
                     plugins: {
                         datalabels: {
                             anchor: 'end',
                             align: 'end',
                             offset: 2,
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (val) => parseFloat(val).toFixed(2)
+                            font: { weight: 'bold', size: 10 },
+                            formatter: function(value, context) {
+                                const datasetIndex = context.datasetIndex; // 0: Actual, 1: Target
+                                const index = context.dataIndex;
+                                const valNum = parseFloat(value);
+
+                                // Untuk Dataset Actual Toko -> Tampilkan Nilai + (Achieve / Not Achieve)
+                                if (datasetIndex === 0) {
+                                    const targetNum = parseFloat(targetData[index]);
+                                    const status = valNum >= targetNum ? ' (Achieve)' : ' (Not Achieve)';
+                                    return valNum.toFixed(2) + status;
+                                }
+                                
+                                // Untuk Dataset Target Level 1 -> Tampilkan Angkanya Saja
+                                return valNum.toFixed(2);
+                            },
+                            color: function(context) {
+                                const datasetIndex = context.datasetIndex;
+                                const index = context.dataIndex;
+                                if (datasetIndex === 0) {
+                                    const valNum = parseFloat(actualData[index]);
+                                    const targetNum = parseFloat(targetData[index]);
+                                    return valNum >= targetNum ? '#16a34a' : '#dc2626'; // Hijau jika Achieve, Merah jika Not Achieve
+                                }
+                                return '#d97706'; // Oranye untuk Target
+                            }
                         }
                     }
                 }
