@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels Plugin CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <!-- PapaParse for CSV Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
@@ -124,6 +126,9 @@
     </div>
 
     <script>
+        // Register DataLabels Plugin ke Chart.js
+        Chart.register(ChartDataLabels);
+
         const GUEST_PIN = "guest";
         const ADMIN_PIN = "admin";
 
@@ -228,8 +233,6 @@
                 const txVal = parseFloat(getItem(['Total Transaksi', 'Transaksi', 'Tx']) || 0);
                 
                 const uptVal = parseFloat(getItem(['UPT', 'UPT Actual']) || (txVal > 0 ? qtyVal / txVal : 0));
-                
-                // MENGAMBIL TARGET LEVEL 1 (DIPRIORITASKAN)
                 const targetLvl1Val = parseFloat(getItem(['Target Level 1', 'Target Level1', 'Level 1', 'Target Base UPT', 'Target Base']) || 4.09);
 
                 return {
@@ -306,7 +309,7 @@
             document.getElementById('totalTx').textContent = totalTx.toLocaleString('id-ID');
             document.getElementById('avgUPT').textContent = avgUPT.toFixed(2);
 
-            // AGREGASI / PENGELOMPOKAN PER STAFF UNTUK CHART TOP & BOTTOM 3
+            // AGREGASI PER STAFF
             const staffGroup = {};
             processed.forEach(d => {
                 if (!staffGroup[d.nama]) {
@@ -332,7 +335,6 @@
                 };
             });
 
-            // Urutkan berdasarkan Rata-rata UPT Terakumulasi
             const sortedStaff = [...aggregatedStaff].sort((a, b) => b.avgUpt - a.avgUpt);
             const top3 = sortedStaff.slice(0, 3);
             const bottom3 = sortedStaff.slice(-3).reverse();
@@ -344,6 +346,20 @@
         function renderCharts(top3, bottom3) {
             if (topChartInstance) topChartInstance.destroy();
             if (bottomChartInstance) bottomChartInstance.destroy();
+
+            // Opsi Tampilan Label Angka di Atas Bar
+            const datalabelsOption = {
+                anchor: 'end',
+                align: 'end',
+                offset: 2,
+                font: {
+                    weight: 'bold',
+                    size: 12
+                },
+                formatter: function(value) {
+                    return parseFloat(value).toFixed(2);
+                }
+            };
 
             const ctxTop = document.getElementById('topChart').getContext('2d');
             topChartInstance = new Chart(ctxTop, {
@@ -358,7 +374,15 @@
                         borderWidth: 1
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    layout: { padding: { top: 25 } }, // Memberikan ruang di atas bar agar angka tidak terpotong
+                    scales: { y: { beginAtZero: true } },
+                    plugins: {
+                        datalabels: { ...datalabelsOption, color: '#15803d' } // Warna hijau tebal
+                    }
+                }
             });
 
             const ctxBottom = document.getElementById('bottomChart').getContext('2d');
@@ -374,7 +398,15 @@
                         borderWidth: 1
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    layout: { padding: { top: 25 } }, // Memberikan ruang di atas bar agar angka tidak terpotong
+                    scales: { y: { beginAtZero: true } },
+                    plugins: {
+                        datalabels: { ...datalabelsOption, color: '#b91c1c' } // Warna merah tebal
+                    }
+                }
             });
         }
 
