@@ -28,17 +28,14 @@
                 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-2">
-                    <!-- Tombol Form (Hanya Admin) -->
                     <a id="linkGoogleForm" href="#" target="_blank" class="hidden bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs flex items-center gap-1">
                         📝 Input Google Form
                     </a>
                     
-                    <!-- Tombol Database Google Sheet (Hanya Admin) -->
                     <a id="linkDatabaseSheet" href="#" target="_blank" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs flex items-center gap-1">
                         📊 Buka Database (Sheet)
                     </a>
 
-                    <!-- Tombol Ganti Akses -->
                     <button type="button" onclick="loginPrompt()" class="bg-indigo-900 hover:bg-indigo-950 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs">
                         🔑 Switch Access
                     </button>
@@ -108,14 +105,14 @@
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIK</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIK / ID</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Staff</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Toko</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty Sold</th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Transaksi</th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">UPT Actual</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target UPT</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target Base</th>
                                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">% Capaian</th>
                             </tr>
                         </thead>
@@ -127,15 +124,12 @@
     </div>
 
     <script>
-        // --- KATA SANDI ---
         const GUEST_PIN = "guest";
         const ADMIN_PIN = "admin";
 
-        // --- KONFIGURASI LINK DATA ---
         const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSefNqJnXC9d0JpY_hSgQfL9u0nX5Scjeova__8Vfq7LLNcWRA/viewform?usp=dialog"; 
         const GOOGLE_SHEET_DATABASE_URL = "https://docs.google.com/spreadsheets/d/1q1a3yXAF-WP5TKZ6EkkMzY6ZKuk7gW1CidryBFebFRU/edit?resourcekey=&gid=1559517639#gid=1559517639"; 
         
-        // Link CSV Pubhtml Google Sheet
         const rawCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pubhtml";
         const GOOGLE_SHEET_CSV_URL = rawCsvUrl.replace('/pubhtml', '/pub?output=csv');
 
@@ -197,9 +191,6 @@
                     rawData = processSheetData(results.data);
                     populateFilters();
                     renderDashboard();
-                },
-                error: function(err) {
-                    console.error("Gagal membaca CSV:", err);
                 }
             });
         }
@@ -216,20 +207,34 @@
                     return '';
                 };
 
+                const qtyVal = parseFloat(getItem(['Total Qty Sold', 'Qty Sold', 'Qty']) || 0);
+                const txVal = parseFloat(getItem(['Total Transaksi', 'Transaksi', 'Tx']) || 0);
+                
+                // Kolom H = UPT Actual
+                const uptVal = parseFloat(getItem(['UPT', 'UPT Actual']) || (txVal > 0 ? qtyVal / txVal : 0));
+                
+                // Kolom I = Target Base UPT
+                const targetBaseVal = parseFloat(getItem(['Target Base UPT', 'Target Base', 'Target UPT']) || 3.84);
+                
+                // Kolom M = Achievement % (jika ada nilai persen dari sheet, atau dihitung ulang)
+                const achVal = parseFloat(getItem(['Achievement %', 'Achievement', 'Capaian %']) || 0);
+
                 return {
-                    timestamp: getItem(['Timestamp', 'Tanggal', 'Waktu']),
-                    nik: getItem(['NIK', 'ID Staff', 'Nomor Induk']),
-                    nama: getItem(['Nama Staff', 'Nama Karyawan', 'Nama Kasir', 'Nama']),
-                    toko: getItem(['Nama Toko', 'Toko', 'Cabang']),
+                    timestamp: getItem(['Timestamp', 'Tanggal']),
+                    nik: getItem(['NIK', 'ID Staff']) || '-',
+                    nama: getItem(['Nama Kasir', 'Nama Staff', 'Nama Karyawan', 'Nama']) || 'Kasir',
+                    toko: getItem(['Nama Toko', 'Toko', 'Cabang']) || 'Toko',
                     kategori: getItem(['Kategori Grup Toko', 'Kategori Toko', 'Kategori']) || 'Umum',
-                    abm: getItem(['ABM', 'Asst. Branch Manager', 'Asst Branch Manager']) || '-',
+                    abm: getItem(['ABM', 'Asst. Branch Manager']) || '-',
                     bm: getItem(['BM', 'Branch Manager']) || '-',
-                    shift: getItem(['Shift', 'Jam Kerja']) || '-',
-                    qty: parseFloat(getItem(['Qty Sold', 'Total Qty Sold', 'Qty', 'Jumlah Qty']) || 0),
-                    tx: parseFloat(getItem(['Transaksi', 'Total Transaksi', 'Jumlah Transaksi', 'Tx']) || 0),
-                    targetUpt: parseFloat(getItem(['Target UPT', 'Target']) || 2.5)
+                    shift: getItem(['Shift']) || '-',
+                    qty: qtyVal,
+                    tx: txVal,
+                    upt: uptVal,
+                    targetUpt: targetBaseVal,
+                    achievementSheet: achVal
                 };
-            }).filter(d => d.nama || d.nik || d.toko);
+            }).filter(d => d.qty > 0 || d.tx > 0 || d.nama !== 'Kasir');
         }
 
         function populateFilters() {
@@ -277,9 +282,8 @@
             });
 
             const processed = filtered.map(d => {
-                const upt = d.tx > 0 ? (d.qty / d.tx) : 0;
-                const pct = d.targetUpt > 0 ? ((upt / d.targetUpt) * 100) : 0;
-                return { ...d, upt, pct };
+                const pct = d.targetUpt > 0 ? ((d.upt / d.targetUpt) * 100) : 0;
+                return { ...d, pct };
             });
 
             const totalQty = processed.reduce((acc, curr) => acc + curr.qty, 0);
@@ -349,7 +353,7 @@
                     <td class="px-4 py-2">${d.shift}</td>
                     <td class="px-4 py-2 text-right">${d.qty.toLocaleString('id-ID')}</td>
                     <td class="px-4 py-2 text-right">${d.tx.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2 text-right font-bold">${d.upt.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right font-bold text-indigo-600">${d.upt.toFixed(2)}</td>
                     <td class="px-4 py-2 text-right text-gray-500">${d.targetUpt.toFixed(2)}</td>
                     <td class="px-4 py-2 text-center">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAchieved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
