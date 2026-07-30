@@ -14,25 +14,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         /* CSS Watermark Background */
-        .bg-watermark {
-            position: relative;
-        }
-        .bg-watermark::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            /* Pastikan nama file gambar panda disesuaikan jika berbeda */
-            background-image: url('bg-panda.png'); 
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            opacity: 0.12; /* Ketipisan/transparansi (12%) agar data tetap jelas terbaca */
-            z-index: 0;
-            pointer-events: none;
-        }
+        /* CSS Watermark Background */
+.bg-watermark {
+    position: relative;
+}
+.bg-watermark::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Menggunakan URL langsung agar pasti muncul di GitHub Pages */
+    background-image: url('https://i.ibb.co.co/1fW5g32p/panda-mrdiy.png'); 
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.12; /* Sesuaikan ketipisan di sini (0.05 s/d 0.20) */
+    z-index: 0;
+    pointer-events: none;
+}
     </style>
 </head>
 <body class="bg-slate-100/90 font-sans leading-normal tracking-normal bg-watermark">
