@@ -13,26 +13,26 @@
     <!-- PapaParse for CSV Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        /* CSS Watermark Panda yang Pasti Muncull */
+        /* CSS Watermark Panda MR.D.I.Y. Asli */
         body::before {
             content: "";
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80vw;
-            height: 80vh;
-            /* Menggunakan gambar SVG Panda langsung di dalam CSS */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><g fill="%23111827"><ellipse cx="160" cy="130" rx="45" ry="40"/><ellipse cx="340" cy="130" rx="45" ry="40"/><ellipse cx="250" cy="270" rx="170" ry="150"/><path fill="%23fff" d="M120 220 Q250 140 380 220 Q250 360 120 220Z"/><ellipse cx="185" cy="235" rx="35" ry="45" fill="%23111827" transform="rotate(-15 185 235)"/><ellipse cx="315" cy="235" rx="35" ry="45" fill="%23111827" transform="rotate(15 315 235)"/><circle cx="190" cy="225" r="12" fill="%23fff"/><circle cx="310" cy="225" r="12" fill="%23fff"/><ellipse cx="250" cy="275" rx="22" ry="14" fill="%23111827"/><path fill="none" stroke="%23111827" stroke-width="6" stroke-linecap="round" d="M 230 298 Q 250 315 270 298"/><ellipse cx="140" cy="265" rx="18" ry="12" fill="%23f43f5e" opacity="0.4"/><ellipse cx="360" cy="265" rx="18" ry="12" fill="%23f43f5e" opacity="0.4"/></g><rect x="180" y="380" width="140" height="40" rx="8" fill="%23eab308"/><text x="250" y="406" font-family="Arial, sans-serif" font-weight="bold" font-size="20" fill="%23000" text-anchor="middle">MR.D.I.Y.</text></svg>');
+            width: 75vw;
+            height: 75vh;
+            /* Menggunakan direct link Catbox kamu */
+            background-image: url('https://files.catbox.moe/e2662g.png'); 
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            opacity: 0.15; /* Tingkat ketipisan watermark (15%) */
+            opacity: 0.15; /* Sesuaikan ketipisan: 0.10 (lebih tipis) s/d 0.20 (lebih tebal) */
             pointer-events: none;
-            z-index: 1; /* Supaya posisinya aman di atas background */
+            z-index: 1;
         }
 
-        /* Memastikan konten dashboard ada di atas watermark */
+        /* Memastikan isi dashboard berada di atas watermark */
         #dashboardContent {
             position: relative;
             z-index: 10;
