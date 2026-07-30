@@ -319,6 +319,7 @@
         }
 
         // 3. SCRIPT CHART.JS INITIALIZATION
+       // 3. SCRIPT CHART.JS INITIALIZATION (KEMBALI KE WARNA ASLI CERAH & CLEAN)
         window.onload = function() {
             // Main Chart
             const ctxMain = document.getElementById('mainChart').getContext('2d');
@@ -330,13 +331,17 @@
                         {
                             label: 'UPT Actual Toko',
                             data: [3.89, 2.69, 7.48, 5.89],
-                            backgroundColor: '#818cf8',
+                            backgroundColor: '#a3a0fb', // Warna Biru Pastel Asli
+                            borderColor: '#807df7',
+                            borderWidth: 1,
                             borderRadius: 6
                         },
                         {
                             label: 'Target Level 1',
                             data: [4.09, 4.80, 3.83, 4.44],
-                            backgroundColor: '#fb923c',
+                            backgroundColor: '#ffaa64', // Warna Orange Pastel Asli
+                            borderColor: '#f59847',
+                            borderWidth: 1,
                             borderRadius: 6
                         }
                     ]
@@ -344,7 +349,23 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' } }
+                    plugins: { 
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                font: { family: 'sans-serif', size: 12 }
+                            }
+                        } 
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
                 }
             });
 
@@ -357,11 +378,19 @@
                     datasets: [{
                         label: 'UPT',
                         data: [7.48, 5.89, 5.25],
-                        backgroundColor: '#34d399',
+                        backgroundColor: '#48d1cc', // Warna Hijau Mint / Emerald Asli
                         borderRadius: 6
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
             });
 
             // Bottom Staff Chart
@@ -373,11 +402,19 @@
                     datasets: [{
                         label: 'UPT',
                         data: [2.69, 3.03, 3.20],
-                        backgroundColor: '#f87171',
+                        backgroundColor: '#ff6b6b', // Warna Merah Soft / Coral Asli
                         borderRadius: 6
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
             });
         };
     </script>
