@@ -13,125 +13,209 @@
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-    <!-- Header -->
-    <header class="bg-indigo-700 text-white p-6 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold">Dashboard Performa UPT Kasir</h1>
-                <p class="text-sm opacity-80">Monitoring Capaian UPT Per Toko & Staff</p>
+    <!-- Modal Login (Guest / Admin) -->
+    <div id="loginModal" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
+            <div class="mb-4 text-indigo-600">
+                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
             </div>
-            <!-- Tombol Input Form -->
-            <a id="linkGoogleForm" href="#" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-200">
-                + Input Data Kasir (Google Form)
-            </a>
+            <h2 class="text-xl font-bold text-gray-800 mb-1">Akses Dashboard</h2>
+            <p class="text-xs text-gray-500 mb-6">Masukkan kata sandi (Guest / Admin)</p>
+            
+            <form id="passwordForm" onsubmit="checkPassword(event)">
+                <input type="password" id="inputPassword" placeholder="Masukkan kata sandi" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 text-center text-sm">
+                <p id="errorMessage" class="text-red-500 text-xs hidden mb-3">Kata sandi salah! Silakan coba lagi.</p>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg transition duration-200 text-sm">
+                    Masuk Dashboard
+                </button>
+            </form>
         </div>
-    </header>
+    </div>
 
-    <div class="container mx-auto p-6">
-        
-        <!-- Slicers / Filter Bar -->
-        <div class="bg-white p-5 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Bulan & Tahun</label>
-                <input type="month" id="filterBulanTahun" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Grup Toko</label>
-                <select id="filterKategori" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Semua Kategori</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Asst. Branch Manager (ABM)</label>
-                <select id="filterABM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Semua ABM</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Branch Manager (BM)</label>
-                <select id="filterBM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Semua BM</option>
-                </select>
-            </div>
-        </div>
+    <!-- Main Dashboard Content (Hidden by Default) -->
+    <div id="dashboardContent" class="hidden">
+        <!-- Header -->
+        <header class="bg-indigo-700 text-white p-6 shadow-md">
+            <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold">Dashboard Performa UPT Kasir</h1>
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm opacity-80">Monitoring Capaian UPT Per Toko & Staff</p>
+                        <span id="roleBadge" class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900 text-indigo-200">Guest</span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2">
+                    <!-- Tombol Form (Hanya Admin) -->
+                    <a id="linkGoogleForm" href="#" target="_blank" class="hidden bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs flex items-center gap-1">
+                        📝 Input Google Form
+                    </a>
+                    
+                    <!-- Tombol Database Google Sheet (Hanya Admin) -->
+                    <a id="linkDatabaseSheet" href="#" target="_blank" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs flex items-center gap-1">
+                        📊 Buka Database (Sheet)
+                    </a>
 
-        <!-- Metric Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
-                <p class="text-gray-500 text-sm font-medium">Total Qty Sold</p>
-                <h3 id="totalQty" class="text-2xl font-bold text-gray-800">0</h3>
+                    <!-- Tombol Keluar -->
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs">
+                        Keluar
+                    </button>
+                </div>
             </div>
-            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
-                <p class="text-gray-500 text-sm font-medium">Total Transaksi</p>
-                <h3 id="totalTx" class="text-2xl font-bold text-gray-800">0</h3>
-            </div>
-            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-indigo-500">
-                <p class="text-gray-500 text-sm font-medium">Rata-rata UPT Capaian</p>
-                <h3 id="avgUPT" class="text-2xl font-bold text-gray-800">0.00</h3>
-            </div>
-        </div>
+        </header>
 
-        <!-- Charts Section (Top 3 & Bottom 3) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Top 3 Performers -->
-            <div class="bg-white p-5 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-green-700 mb-4 flex items-center">
-                    🏆 Top 3 Staff UPT Terbaik
-                </h2>
-                <div class="relative h-64">
-                    <canvas id="topChart"></canvas>
+        <div class="container mx-auto p-6">
+            <!-- Slicers / Filter Bar -->
+            <div class="bg-white p-5 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Bulan & Tahun</label>
+                    <input type="month" id="filterBulanTahun" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Grup Toko</label>
+                    <select id="filterKategori" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Asst. Branch Manager (ABM)</label>
+                    <select id="filterABM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Semua ABM</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Branch Manager (BM)</label>
+                    <select id="filterBM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Semua BM</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Bottom 3 Performers -->
+            <!-- Metric Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
+                    <p class="text-gray-500 text-sm font-medium">Total Qty Sold</p>
+                    <h3 id="totalQty" class="text-2xl font-bold text-gray-800">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                    <p class="text-gray-500 text-sm font-medium">Total Transaksi</p>
+                    <h3 id="totalTx" class="text-2xl font-bold text-gray-800">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-indigo-500">
+                    <p class="text-gray-500 text-sm font-medium">Rata-rata UPT Capaian</p>
+                    <h3 id="avgUPT" class="text-2xl font-bold text-gray-800">0.00</h3>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white p-5 rounded-lg shadow-md">
+                    <h2 class="text-lg font-bold text-green-700 mb-4 flex items-center">🏆 Top 3 Staff UPT Terbaik</h2>
+                    <div class="relative h-64"><canvas id="topChart"></canvas></div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-md">
+                    <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center">⚠️ Bottom 3 Staff UPT Terrendah</h2>
+                    <div class="relative h-64"><canvas id="bottomChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Table Data Staff -->
             <div class="bg-white p-5 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center">
-                    ⚠️ Bottom 3 Staff UPT Terrendah
-                </h2>
-                <div class="relative h-64">
-                    <canvas id="bottomChart"></canvas>
+                <h2 class="text-lg font-bold text-gray-800 mb-4">Rincian Performa Kasir</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIK</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Staff</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Toko</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty Sold</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Transaksi</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">UPT Actual</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target UPT</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">% Capaian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-
-        <!-- Table Data Staff -->
-        <div class="bg-white p-5 rounded-lg shadow-md">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Rincian Performa Kasir</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIK</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Staff</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Toko</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
-                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty Sold</th>
-                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Transaksi</th>
-                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">UPT Actual</th>
-                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target UPT</th>
-                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">% Capaian</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // --- KONFIGURASI GOOGLE SHEETS & FORM ---
-        // 1. Masukkan URL Google Form Anda di sini
-        const https://docs.google.com/forms/d/e/1FAIpQLSefNqJnXC9d0JpY_hSgQfL9u0nX5Scjeova__8Vfq7LLNcWRA/viewform?usp=publish-editor = "https://forms.google.com/YOUR_FORM_URL"; 
-        
-        // 2. Publish Google Sheet ke CSV (File -> Share -> Publish to web -> CSV) lalu tempel URL-nya di bawah
-        const https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pub?output=csv = "DUMMY_DATA"; // Jika diisi "DUMMY_DATA", dashboard menggunakan data simulasi
+        // --- KONFIGURASI KATA SANDI ---
+        const GUEST_PASSWORD = "guest123";  // Sandi untuk Tamu
+        const ADMIN_PASSWORD = "admin123";  // Sandi Khusus Admin (Anda)
 
-        document.getElementById('linkGoogleForm').href = GOOGLE_FORM_URL;
+        // --- KONFIGURASI LINK (Hanya bisa diakses jika login Admin) ---
+        const https://docs.google.com/forms/d/e/1FAIpQLSefNqJnXC9d0JpY_hSgQfL9u0nX5Scjeova__8Vfq7LLNcWRA/viewform?usp=dialog = "https://forms.google.com/YOUR_FORM_URL"; 
+        const https://docs.google.com/spreadsheets/d/1q1a3yXAF-WP5TKZ6EkkMzY6ZKuk7gW1CidryBFebFRU/edit?resourcekey=&gid=1559517639#gid=1559517639 = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID"; // Link Google Sheet Lengkap
+        const https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pubhtml = "DUMMY_DATA"; 
 
-        // Data Simulasi (Fallback jika belum ada Google Sheet)
+        // Cek Sesi Login saat Pertama Buka Web
+        window.onload = function() {
+            const userRole = sessionStorage.getItem("userRole");
+            if (userRole === "admin" || userRole === "guest") {
+                showDashboard(userRole);
+            }
+        };
+
+        function checkPassword(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById("inputPassword").value;
+            const errorMsg = document.getElementById("errorMessage");
+
+            if (inputPass === ADMIN_PASSWORD) {
+                sessionStorage.setItem("userRole", "admin");
+                showDashboard("admin");
+            } else if (inputPass === GUEST_PASSWORD) {
+                sessionStorage.setItem("userRole", "guest");
+                showDashboard("guest");
+            } else {
+                errorMsg.classList.remove("hidden");
+            }
+        }
+
+        function showDashboard(role) {
+            document.getElementById("loginModal").classList.add("hidden");
+            document.getElementById("dashboardContent").classList.remove("hidden");
+            
+            const badge = document.getElementById("roleBadge");
+            const btnForm = document.getElementById("linkGoogleForm");
+            const btnSheet = document.getElementById("linkDatabaseSheet");
+
+            if (role === "admin") {
+                badge.textContent = "Admin";
+                badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-green-500 text-white";
+                
+                // Tampilkan Akses Admin
+                btnForm.href = GOOGLE_FORM_URL;
+                btnSheet.href = GOOGLE_SHEET_DATABASE_URL;
+                btnForm.classList.remove("hidden");
+                btnSheet.classList.remove("hidden");
+            } else {
+                badge.textContent = "Guest";
+                badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900 text-indigo-200";
+                
+                // Sembunyikan Akses Admin
+                btnForm.classList.add("hidden");
+                btnSheet.classList.add("hidden");
+            }
+
+            initDashboard();
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        // --- DASHBOARD LOGIC ---
         const sampleData = [
             { timestamp: '2026-07-01', nik: '1001', nama: 'Budi Santoso', toko: 'Toko Mawar', kategori: 'A', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 150, tx: 50, targetUpt: 2.5 },
             { timestamp: '2026-07-02', nik: '1002', nama: 'Siti Aminah', toko: 'Toko Melati', kategori: 'B', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 220, tx: 80, targetUpt: 2.5 },
@@ -145,7 +229,6 @@
         let topChartInstance = null;
         let bottomChartInstance = null;
 
-        // Load Data
         function initDashboard() {
             if (GOOGLE_SHEET_CSV_URL === "DUMMY_DATA") {
                 rawData = sampleData;
@@ -180,7 +263,6 @@
             }));
         }
 
-        // Populasi Dropdown Filter
         function populateFilters() {
             const kategoriSet = new Set(rawData.map(d => d.kategori));
             const abmSet = new Set(rawData.map(d => d.abm));
@@ -190,7 +272,6 @@
             fillSelect('filterABM', abmSet);
             fillSelect('filterBM', bmSet);
 
-            // Add Event Listeners
             ['filterBulanTahun', 'filterKategori', 'filterABM', 'filterBM'].forEach(id => {
                 document.getElementById(id).addEventListener('change', renderDashboard);
             });
@@ -198,6 +279,7 @@
 
         function fillSelect(elementId, setValues) {
             const select = document.getElementById(elementId);
+            select.innerHTML = `<option value="">Semua</option>`;
             setValues.forEach(val => {
                 if(val && val !== '-') {
                     const opt = document.createElement('option');
@@ -208,14 +290,12 @@
             });
         }
 
-        // Main Render Function
         function renderDashboard() {
             const bulanTahun = document.getElementById('filterBulanTahun').value;
             const kat = document.getElementById('filterKategori').value;
             const abm = document.getElementById('filterABM').value;
             const bm = document.getElementById('filterBM').value;
 
-            // Filter Data
             const filtered = rawData.filter(d => {
                 let matchDate = true;
                 if (bulanTahun && d.timestamp) {
@@ -227,14 +307,12 @@
                 return matchDate && matchKat && matchAbm && matchBm;
             });
 
-            // Hitung UPT per Baris Data
             const processed = filtered.map(d => {
                 const upt = d.tx > 0 ? (d.qty / d.tx) : 0;
                 const pct = d.targetUpt > 0 ? ((upt / d.targetUpt) * 100) : 0;
                 return { ...d, upt, pct };
             });
 
-            // Update Summary Cards
             const totalQty = processed.reduce((acc, curr) => acc + curr.qty, 0);
             const totalTx = processed.reduce((acc, curr) => acc + curr.tx, 0);
             const avgUPT = totalTx > 0 ? (totalQty / totalTx) : 0;
@@ -243,7 +321,6 @@
             document.getElementById('totalTx').textContent = totalTx.toLocaleString('id-ID');
             document.getElementById('avgUPT').textContent = avgUPT.toFixed(2);
 
-            // Sort Top & Bottom
             const sorted = [...processed].sort((a, b) => b.upt - a.upt);
             const top3 = sorted.slice(0, 3);
             const bottom3 = sorted.slice(-3).reverse();
@@ -252,12 +329,10 @@
             renderTable(processed);
         }
 
-        // Render Charts Function
         function renderCharts(top3, bottom3) {
             if (topChartInstance) topChartInstance.destroy();
             if (bottomChartInstance) bottomChartInstance.destroy();
 
-            // Top Chart
             const ctxTop = document.getElementById('topChart').getContext('2d');
             topChartInstance = new Chart(ctxTop, {
                 type: 'bar',
@@ -274,7 +349,6 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
 
-            // Bottom Chart
             const ctxBottom = document.getElementById('bottomChart').getContext('2d');
             bottomChartInstance = new Chart(ctxBottom, {
                 type: 'bar',
@@ -292,7 +366,6 @@
             });
         }
 
-        // Render Table Function
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
@@ -318,9 +391,6 @@
                 tbody.appendChild(tr);
             });
         }
-
-        // Initialize on Load
-        window.onload = initDashboard;
     </script>
 </body>
 </html>
