@@ -46,15 +46,23 @@
         <!-- Header -->
         <header class="bg-gradient-to-r from-indigo-700 via-indigo-800 to-purple-800 text-white p-6 shadow-lg">
             <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
-                        <span>📊</span> Dashboard Performa UPT Kasir
-                    </h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <p class="text-sm opacity-90">Monitoring Capaian UPT Per Toko & Staff</p>
-                        <span id="roleBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-900/80 text-indigo-200 border border-indigo-400/30">Guest</span>
-                    </div>
-                </div>
+                <!-- Bagian Header yang Diperbarui -->
+<div>
+    <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
+        <span>📊</span> Dashboard Performa UPT Kasir
+    </h1>
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-1">
+        <div class="flex items-center gap-2">
+            <p class="text-sm opacity-90">Monitoring Capaian UPT Per Toko & Staff</p>
+            <span id="roleBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-900/80 text-indigo-200 border border-indigo-400/30">Guest</span>
+        </div>
+        <!-- Element Jam & Tanggal Realtime -->
+        <span class="hidden sm:inline opacity-40">•</span>
+        <div id="realtimeClock" class="text-xs font-mono bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 text-indigo-100 flex items-center gap-1.5 w-fit">
+            <span>🕒</span> <span id="clockText">Memuat waktu...</span>
+        </div>
+    </div>
+</div>
                 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-2">
@@ -689,6 +697,35 @@
                 tbody.appendChild(tr);
             });
         }
+        // Fungsi Waktu Realtime
+function updateRealtimeClock() {
+    const now = new Date();
+    
+    // Format Hari, Tanggal, Bulan, Tahun
+    const optionsDate = { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    const dateString = now.toLocaleDateString('id-ID', optionsDate);
+    
+    // Format Jam:Menit:Detik
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}:${seconds} WIB`;
+    
+    // Tampilkan di HTML
+    const clockElement = document.getElementById('clockText');
+    if (clockElement) {
+        clockElement.textContent = `${dateString} • ${timeString}`;
+    }
+}
+
+// Jalankan jam secara realtime setiap 1 detik
+setInterval(updateRealtimeClock, 1000);
+updateRealtimeClock(); // panggil langsung saat load pertama
     </script>
 </body>
 </html>
