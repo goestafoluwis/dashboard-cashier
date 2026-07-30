@@ -13,32 +13,34 @@
     <!-- PapaParse for CSV Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<body class="bg-slate-100 font-sans leading-normal tracking-normal">
 
     <!-- Main Dashboard Content -->
     <div id="dashboardContent">
         <!-- Header -->
-        <header class="bg-indigo-700 text-white p-6 shadow-md">
+        <header class="bg-gradient-to-r from-indigo-700 via-indigo-800 to-purple-800 text-white p-6 shadow-lg">
             <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold">Dashboard Performa UPT Kasir</h1>
-                    <div class="flex items-center gap-2">
-                        <p class="text-sm opacity-80">Monitoring Capaian UPT Per Toko & Staff</p>
-                        <span id="roleBadge" class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900 text-indigo-200">Guest</span>
+                    <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
+                        <span>📊</span> Dashboard Performa UPT Kasir
+                    </h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p class="text-sm opacity-90">Monitoring Capaian UPT Per Toko & Staff</p>
+                        <span id="roleBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-900/80 text-indigo-200 border border-indigo-400/30">Guest</span>
                     </div>
                 </div>
                 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-2">
-                    <a id="linkGoogleForm" href="#" target="_blank" class="hidden bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs flex items-center gap-1">
+                    <a id="linkGoogleForm" href="#" target="_blank" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-3.5 rounded-xl shadow-md hover:shadow-lg transition duration-200 text-xs flex items-center gap-1.5">
                         📝 Input Google Form
                     </a>
                     
-                    <a id="linkDatabaseSheet" href="#" target="_blank" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs flex items-center gap-1">
+                    <a id="linkDatabaseSheet" href="#" target="_blank" class="hidden bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-3.5 rounded-xl shadow-md hover:shadow-lg transition duration-200 text-xs flex items-center gap-1.5">
                         📊 Buka Database (Sheet)
                     </a>
 
-                    <button type="button" onclick="loginPrompt()" class="bg-indigo-900 hover:bg-indigo-950 text-white font-semibold py-2 px-3 rounded-lg shadow transition duration-200 text-xs">
+                    <button type="button" onclick="loginPrompt()" class="bg-indigo-950/80 hover:bg-indigo-950 text-white font-semibold py-2 px-3.5 rounded-xl shadow-md hover:shadow-lg transition duration-200 text-xs border border-indigo-500/30">
                         🔑 Switch Access
                     </button>
                 </div>
@@ -47,26 +49,26 @@
 
         <div class="container mx-auto p-6">
             <!-- Slicers / Filter Bar -->
-            <div class="bg-white p-5 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bulan & Tahun</label>
-                    <input type="month" id="filterBulanTahun" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Bulan & Tahun</label>
+                    <input type="month" id="filterBulanTahun" class="w-full border-gray-200 rounded-xl shadow-sm border p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Grup Toko</label>
-                    <select id="filterKategori" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Kategori Grup Toko</label>
+                    <select id="filterKategori" class="w-full border-gray-200 rounded-xl shadow-sm border p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         <option value="">Semua Kategori</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Asst. Branch Manager (ABM)</label>
-                    <select id="filterABM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Asst. Branch Manager (ABM)</label>
+                    <select id="filterABM" class="w-full border-gray-200 rounded-xl shadow-sm border p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         <option value="">Semua ABM</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Branch Manager (BM)</label>
-                    <select id="filterBM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Branch Manager (BM)</label>
+                    <select id="filterBM" class="w-full border-gray-200 rounded-xl shadow-sm border p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                         <option value="">Semua BM</option>
                     </select>
                 </div>
@@ -74,78 +76,96 @@
 
             <!-- Metric Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
-                    <p class="text-gray-500 text-sm font-medium">Total Qty Sold</p>
-                    <h3 id="totalQty" class="text-2xl font-bold text-gray-800">0</h3>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Qty Sold</p>
+                        <h3 id="totalQty" class="text-3xl font-extrabold text-gray-800 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">🛍️</div>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
-                    <p class="text-gray-500 text-sm font-medium">Total Transaksi</p>
-                    <h3 id="totalTx" class="text-2xl font-bold text-gray-800">0</h3>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Transaksi</p>
+                        <h3 id="totalTx" class="text-3xl font-extrabold text-gray-800 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">💳</div>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-indigo-500">
-                    <p class="text-gray-500 text-sm font-medium">Rata-rata UPT Capaian</p>
-                    <h3 id="avgUPT" class="text-2xl font-bold text-gray-800">0.00</h3>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Rata-rata UPT Capaian</p>
+                        <h3 id="avgUPT" class="text-3xl font-extrabold text-gray-800 mt-1">0.00</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">📈</div>
                 </div>
             </div>
 
             <!-- Performa Per Toko vs Target Level 1 Section -->
-            <div class="bg-white p-5 rounded-lg shadow-md mb-6">
-                <h2 class="text-lg font-bold text-indigo-800 mb-4 flex items-center gap-2">
-                    🏪 Performa UPT Per Toko vs Target Level 1
-                </h2>
-                <div class="relative h-72 mb-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <span>🏪</span> Performa UPT Per Toko vs Target Level 1
+                    </h2>
+                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full">Interaktif & Real-time</span>
+                </div>
+                <div class="relative h-80 mb-6">
                     <canvas id="storeChart"></canvas>
                 </div>
                 
                 <!-- Ringkasan Performa Per Toko -->
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-indigo-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-indigo-700 uppercase">Nama Toko</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">Total Qty Sold</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">Total Transaksi</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">UPT Actual Toko</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-indigo-700 uppercase">Target Level 1</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-indigo-700 uppercase">% Capaian Toko</th>
+                    <table class="min-w-full divide-y divide-gray-100 text-sm">
+                        <thead>
+                            <tr class="bg-gray-50/80">
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider rounded-l-xl">Nama Toko</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total Qty Sold</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total Transaksi</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">UPT Actual Toko</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Target Level 1</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider rounded-r-xl">% Capaian Toko</th>
                             </tr>
                         </thead>
-                        <tbody id="storeTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        <tbody id="storeTableBody" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Charts Staff Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white p-5 rounded-lg shadow-md">
-                    <h2 class="text-lg font-bold text-green-700 mb-4 flex items-center">🏆 Top 3 Staff (Rata-rata UPT)</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold text-emerald-700 mb-4 flex items-center gap-2">
+                        <span>🏆</span> Top 3 Staff (Rata-rata UPT)
+                    </h2>
                     <div class="relative h-64"><canvas id="topChart"></canvas></div>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-md">
-                    <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center">⚠️ Bottom 3 Staff (Rata-rata UPT)</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold text-rose-700 mb-4 flex items-center gap-2">
+                        <span>⚠️</span> Bottom 3 Staff (Rata-rata UPT)
+                    </h2>
                     <div class="relative h-64"><canvas id="bottomChart"></canvas></div>
                 </div>
             </div>
 
             <!-- Table Data Staff -->
-            <div class="bg-white p-5 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4">Rincian Performa Kasir</h2>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <span>📋</span> Rincian Performa Kasir
+                </h2>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Waktu Input</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Staff</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Toko</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty Sold</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Transaksi</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">UPT Actual</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target Level 1</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">% Capaian</th>
+                    <table class="min-w-full divide-y divide-gray-100 text-sm">
+                        <thead>
+                            <tr class="bg-gray-50/80">
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider rounded-l-xl">Waktu Input</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Staff</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Toko</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Shift</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Qty Sold</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Transaksi</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">UPT Actual</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Target Level 1</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider rounded-r-xl">% Capaian</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        <tbody id="tableBody" class="bg-white divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -198,14 +218,14 @@
 
             if (role === "admin") {
                 badge.textContent = "Admin";
-                badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-green-500 text-white";
+                badge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm";
                 btnForm.href = GOOGLE_FORM_URL;
                 btnSheet.href = GOOGLE_SHEET_DATABASE_URL;
                 btnForm.classList.remove("hidden");
                 btnSheet.classList.remove("hidden");
             } else {
                 badge.textContent = "Guest";
-                badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900 text-indigo-200";
+                badge.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-900/80 text-indigo-200 border border-indigo-400/30";
                 btnForm.classList.add("hidden");
                 btnSheet.classList.add("hidden");
             }
@@ -392,7 +412,7 @@
             const top3 = sortedStaff.slice(0, 3);
             const bottom3 = sortedStaff.slice(-3).reverse();
 
-            // Render
+            // Render komponen
             renderStorePerformance(aggregatedStores);
             renderStaffCharts(top3, bottom3);
             renderTable(processed);
@@ -406,6 +426,17 @@
             const targetData = storesData.map(s => s.targetLvl1.toFixed(2));
 
             const ctxStore = document.getElementById('storeChart').getContext('2d');
+
+            // Membuat Warna Gradient Cantik untuk Actual
+            const gradientActual = ctxStore.createLinearGradient(0, 0, 0, 300);
+            gradientActual.addColorStop(0, 'rgba(99, 102, 241, 0.9)'); // Indigo 500
+            gradientActual.addColorStop(1, 'rgba(129, 140, 248, 0.4)'); // Indigo 400
+
+            // Membuat Warna Gradient Cantik untuk Target
+            const gradientTarget = ctxStore.createLinearGradient(0, 0, 0, 300);
+            gradientTarget.addColorStop(0, 'rgba(251, 146, 60, 0.9)'); // Orange 400
+            gradientTarget.addColorStop(1, 'rgba(253, 186, 116, 0.4)'); // Orange 300
+
             storeChartInstance = new Chart(ctxStore, {
                 type: 'bar',
                 data: {
@@ -414,44 +445,72 @@
                         {
                             label: 'UPT Actual Toko',
                             data: actualData,
-                            backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                            backgroundColor: gradientActual,
                             borderColor: 'rgb(79, 70, 229)',
-                            borderWidth: 1
+                            borderWidth: 2,
+                            borderRadius: 12, // Membuat sudut grafik membulat (rounded)
+                            borderSkipped: false,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.7
                         },
                         {
                             label: 'Target Level 1',
                             data: targetData,
-                            backgroundColor: 'rgba(245, 158, 11, 0.85)',
-                            borderColor: 'rgb(245, 158, 11)',
-                            borderWidth: 1
+                            backgroundColor: gradientTarget,
+                            borderColor: 'rgb(249, 115, 22)',
+                            borderWidth: 2,
+                            borderRadius: 12,
+                            borderSkipped: false,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.7
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 30 } }, // Beri ruang ekstra untuk teks Achieve / Not Achieve
-                    scales: { y: { beginAtZero: true } },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutBounce' // Animasi membal saat grafik dimuat
+                    },
+                    layout: { padding: { top: 35 } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { weight: 'bold' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(243, 244, 246, 1)' }
+                        }
+                    },
                     plugins: {
+                        legend: {
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { weight: 'bold', size: 12 }
+                            }
+                        },
                         datalabels: {
                             anchor: 'end',
                             align: 'end',
-                            offset: 2,
-                            font: { weight: 'bold', size: 10 },
+                            offset: 4,
+                            font: { weight: 'bold', size: 11 },
                             formatter: function(value, context) {
-                                const datasetIndex = context.datasetIndex; // 0: Actual, 1: Target
+                                const datasetIndex = context.datasetIndex;
                                 const index = context.dataIndex;
                                 const valNum = parseFloat(value);
 
-                                // Untuk Dataset Actual Toko -> Tampilkan Nilai + (Achieve / Not Achieve)
                                 if (datasetIndex === 0) {
                                     const targetNum = parseFloat(targetData[index]);
-                                    const status = valNum >= targetNum ? ' (Achieve)' : ' (Not Achieve)';
-                                    return valNum.toFixed(2) + status;
+                                    const isAchieve = valNum >= targetNum;
+                                    const emoji = isAchieve ? '🎉' : '⚠️';
+                                    const status = isAchieve ? ' (Achieve)' : ' (Not Achieve)';
+                                    return `${emoji} ${valNum.toFixed(2)}${status}`;
                                 }
                                 
-                                // Untuk Dataset Target Level 1 -> Tampilkan Angkanya Saja
-                                return valNum.toFixed(2);
+                                return `🎯 ${valNum.toFixed(2)}`;
                             },
                             color: function(context) {
                                 const datasetIndex = context.datasetIndex;
@@ -459,9 +518,9 @@
                                 if (datasetIndex === 0) {
                                     const valNum = parseFloat(actualData[index]);
                                     const targetNum = parseFloat(targetData[index]);
-                                    return valNum >= targetNum ? '#16a34a' : '#dc2626'; // Hijau jika Achieve, Merah jika Not Achieve
+                                    return valNum >= targetNum ? '#059669' : '#dc2626'; // Emerald Hijau / Rose Merah
                                 }
-                                return '#d97706'; // Oranye untuk Target
+                                return '#ea580c'; // Orange Target
                             }
                         }
                     }
@@ -474,14 +533,15 @@
             storesData.forEach(s => {
                 const tr = document.createElement('tr');
                 const isAchieved = s.pctCapaian >= 100;
+                tr.className = "hover:bg-gray-50/80 transition";
                 tr.innerHTML = `
-                    <td class="px-4 py-2 font-bold text-gray-800">${s.toko}</td>
-                    <td class="px-4 py-2 text-right">${s.totalQty.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2 text-right">${s.totalTx.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2 text-right font-bold text-indigo-600">${s.uptActual.toFixed(2)}</td>
-                    <td class="px-4 py-2 text-right text-gray-600">${s.targetLvl1.toFixed(2)}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAchieved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                    <td class="px-4 py-3 font-bold text-gray-800">${s.toko}</td>
+                    <td class="px-4 py-3 text-right text-gray-600">${s.totalQty.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right text-gray-600">${s.totalTx.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right font-bold text-indigo-600">${s.uptActual.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-right text-gray-500">${s.targetLvl1.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${isAchieved ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
                             ${s.pctCapaian.toFixed(1)}%
                         </span>
                     </td>
@@ -494,15 +554,11 @@
             if (topChartInstance) topChartInstance.destroy();
             if (bottomChartInstance) bottomChartInstance.destroy();
 
-            const datalabelsOption = {
-                anchor: 'end',
-                align: 'end',
-                offset: 2,
-                font: { weight: 'bold', size: 12 },
-                formatter: (val) => parseFloat(val).toFixed(2)
-            };
-
             const ctxTop = document.getElementById('topChart').getContext('2d');
+            const gradTop = ctxTop.createLinearGradient(0, 0, 0, 250);
+            gradTop.addColorStop(0, 'rgba(16, 185, 129, 0.9)'); // Emerald 500
+            gradTop.addColorStop(1, 'rgba(110, 231, 183, 0.4)'); // Emerald 300
+
             topChartInstance = new Chart(ctxTop, {
                 type: 'bar',
                 data: {
@@ -510,23 +566,41 @@
                     datasets: [{
                         label: 'Rata-rata UPT Kasir',
                         data: top3.map(d => d.avgUpt.toFixed(2)),
-                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
-                        borderColor: 'rgb(34, 197, 94)',
-                        borderWidth: 1
+                        backgroundColor: gradTop,
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 2,
+                        borderRadius: 12,
+                        borderSkipped: false
                     }]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
+                    animation: { duration: 1200, easing: 'easeInOutQuart' },
                     layout: { padding: { top: 25 } },
-                    scales: { y: { beginAtZero: true } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true }
+                    },
                     plugins: {
-                        datalabels: { ...datalabelsOption, color: '#15803d' }
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 2,
+                            font: { weight: 'bold', size: 12 },
+                            formatter: (val) => `⭐ ${parseFloat(val).toFixed(2)}`,
+                            color: '#047857'
+                        }
                     }
                 }
             });
 
             const ctxBottom = document.getElementById('bottomChart').getContext('2d');
+            const gradBottom = ctxBottom.createLinearGradient(0, 0, 0, 250);
+            gradBottom.addColorStop(0, 'rgba(244, 63, 94, 0.9)'); // Rose 500
+            gradBottom.addColorStop(1, 'rgba(253, 164, 175, 0.4)'); // Rose 300
+
             bottomChartInstance = new Chart(ctxBottom, {
                 type: 'bar',
                 data: {
@@ -534,18 +608,32 @@
                     datasets: [{
                         label: 'Rata-rata UPT Kasir',
                         data: bottom3.map(d => d.avgUpt.toFixed(2)),
-                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                        borderColor: 'rgb(239, 68, 68)',
-                        borderWidth: 1
+                        backgroundColor: gradBottom,
+                        borderColor: 'rgb(244, 63, 94)',
+                        borderWidth: 2,
+                        borderRadius: 12,
+                        borderSkipped: false
                     }]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
+                    animation: { duration: 1200, easing: 'easeInOutQuart' },
                     layout: { padding: { top: 25 } },
-                    scales: { y: { beginAtZero: true } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true }
+                    },
                     plugins: {
-                        datalabels: { ...datalabelsOption, color: '#b91c1c' }
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 2,
+                            font: { weight: 'bold', size: 12 },
+                            formatter: (val) => `📌 ${parseFloat(val).toFixed(2)}`,
+                            color: '#be123c'
+                        }
                     }
                 }
             });
@@ -558,17 +646,18 @@
             data.forEach(d => {
                 const tr = document.createElement('tr');
                 const isAchieved = d.pct >= 100;
+                tr.className = "hover:bg-gray-50/80 transition";
                 tr.innerHTML = `
-                    <td class="px-4 py-2 font-mono text-xs text-gray-500">${d.timestamp}</td>
-                    <td class="px-4 py-2 font-medium text-gray-900">${d.nama}</td>
-                    <td class="px-4 py-2">${d.toko}</td>
-                    <td class="px-4 py-2">${d.shift}</td>
-                    <td class="px-4 py-2 text-right">${d.qty.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2 text-right">${d.tx.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2 text-right font-bold text-indigo-600">${d.upt.toFixed(2)}</td>
-                    <td class="px-4 py-2 text-right text-gray-500">${d.targetUpt.toFixed(2)}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAchieved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                    <td class="px-4 py-3 font-mono text-xs text-gray-500">${d.timestamp}</td>
+                    <td class="px-4 py-3 font-medium text-gray-900">${d.nama}</td>
+                    <td class="px-4 py-3 text-gray-600">${d.toko}</td>
+                    <td class="px-4 py-3 text-gray-600">${d.shift}</td>
+                    <td class="px-4 py-3 text-right text-gray-600">${d.qty.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right text-gray-600">${d.tx.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right font-bold text-indigo-600">${d.upt.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-right text-gray-400">${d.targetUpt.toFixed(2)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${isAchieved ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
                             ${d.pct.toFixed(1)}%
                         </span>
                     </td>
