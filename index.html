@@ -24,7 +24,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-1">Akses Dashboard</h2>
             <p class="text-xs text-gray-500 mb-6">Masukkan kata sandi (Guest / Admin)</p>
             
-            <form id="passwordForm" onsubmit="checkPassword(event)">
+            <form id="passwordForm" onsubmit="checkPassword(event)" autocomplete="off">
                 <input type="password" id="inputPassword" placeholder="Masukkan kata sandi" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 text-center text-sm">
                 <p id="errorMessage" class="text-red-500 text-xs hidden mb-3">Kata sandi salah! Silakan coba lagi.</p>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg transition duration-200 text-sm">
