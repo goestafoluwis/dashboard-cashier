@@ -495,22 +495,24 @@
                         {
                             label: 'UPT Actual Toko',
                             data: actualData,
-                            backgroundColor: '#a3a0fb', // Biru Pastel Clean Original
-                            borderColor: '#807df7',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.7
+                            // Warna Ungu Soft Transparan dengan Border
+                            backgroundColor: 'rgba(163, 160, 251, 0.45)', 
+                            borderColor: 'rgba(128, 125, 247, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            barPercentage: 0.5,
+                            categoryPercentage: 0.6
                         },
                         {
                             label: 'Target Level 1',
                             data: targetData,
-                            backgroundColor: '#ffaa64', // Orange Pastel Clean Original
-                            borderColor: '#f59847',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.7
+                            // Warna Oranye/Peach Soft Transparan dengan Border
+                            backgroundColor: 'rgba(255, 170, 100, 0.45)', 
+                            borderColor: 'rgba(245, 152, 71, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            barPercentage: 0.5,
+                            categoryPercentage: 0.6
                         }
                     ]
                 },
@@ -518,7 +520,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: { duration: 1000 },
-                    layout: { padding: { top: 30 } },
+                    layout: { padding: { top: 35 } },
                     scales: {
                         x: { grid: { display: false } },
                         y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
@@ -555,6 +557,7 @@
                 }
             });
 
+            // Render Tabel Toko
             const tbody = document.getElementById('storeTableBody');
             tbody.innerHTML = '';
             storesData.forEach(s => {
