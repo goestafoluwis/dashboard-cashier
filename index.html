@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard UPT Performance Cashier</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for CSV Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white p-6 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">Dashboard Performa UPT Kasir</h1>
+                <p class="text-sm opacity-80">Monitoring Capaian UPT Per Toko & Staff</p>
+            </div>
+            <!-- Tombol Input Form -->
+            <a id="linkGoogleForm" href="#" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-200">
+                + Input Data Kasir (Google Form)
+            </a>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6">
+        
+        <!-- Slicers / Filter Bar -->
+        <div class="bg-white p-5 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bulan & Tahun</label>
+                <input type="month" id="filterBulanTahun" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Grup Toko</label>
+                <select id="filterKategori" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua Kategori</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Asst. Branch Manager (ABM)</label>
+                <select id="filterABM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua ABM</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Branch Manager (BM)</label>
+                <select id="filterBM" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua BM</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Metric Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm font-medium">Total Qty Sold</p>
+                <h3 id="totalQty" class="text-2xl font-bold text-gray-800">0</h3>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm font-medium">Total Transaksi</p>
+                <h3 id="totalTx" class="text-2xl font-bold text-gray-800">0</h3>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-indigo-500">
+                <p class="text-gray-500 text-sm font-medium">Rata-rata UPT Capaian</p>
+                <h3 id="avgUPT" class="text-2xl font-bold text-gray-800">0.00</h3>
+            </div>
+        </div>
+
+        <!-- Charts Section (Top 3 & Bottom 3) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Top 3 Performers -->
+            <div class="bg-white p-5 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold text-green-700 mb-4 flex items-center">
+                    🏆 Top 3 Staff UPT Terbaik
+                </h2>
+                <div class="relative h-64">
+                    <canvas id="topChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bottom 3 Performers -->
+            <div class="bg-white p-5 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center">
+                    ⚠️ Bottom 3 Staff UPT Terrendah
+                </h2>
+                <div class="relative h-64">
+                    <canvas id="bottomChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Data Staff -->
+        <div class="bg-white p-5 rounded-lg shadow-md">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">Rincian Performa Kasir</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIK</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Staff</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Toko</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
+                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty Sold</th>
+                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Transaksi</th>
+                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">UPT Actual</th>
+                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target UPT</th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">% Capaian</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- KONFIGURASI GOOGLE SHEETS & FORM ---
+        // 1. Masukkan URL Google Form Anda di sini
+        const https://docs.google.com/forms/d/e/1FAIpQLSefNqJnXC9d0JpY_hSgQfL9u0nX5Scjeova__8Vfq7LLNcWRA/viewform?usp=publish-editor = "https://forms.google.com/YOUR_FORM_URL"; 
+        
+        // 2. Publish Google Sheet ke CSV (File -> Share -> Publish to web -> CSV) lalu tempel URL-nya di bawah
+        const https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pub?output=csv = "DUMMY_DATA"; // Jika diisi "DUMMY_DATA", dashboard menggunakan data simulasi
+
+        document.getElementById('linkGoogleForm').href = GOOGLE_FORM_URL;
+
+        // Data Simulasi (Fallback jika belum ada Google Sheet)
+        const sampleData = [
+            { timestamp: '2026-07-01', nik: '1001', nama: 'Budi Santoso', toko: 'Toko Mawar', kategori: 'A', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 150, tx: 50, targetUpt: 2.5 },
+            { timestamp: '2026-07-02', nik: '1002', nama: 'Siti Aminah', toko: 'Toko Melati', kategori: 'B', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 220, tx: 80, targetUpt: 2.5 },
+            { timestamp: '2026-07-03', nik: '1003', nama: 'Eko Prasetyo', toko: 'Toko Mawar', kategori: 'A', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 80, tx: 60, targetUpt: 2.5 },
+            { timestamp: '2026-07-04', nik: '1004', nama: 'Dewi Lestari', toko: 'Toko Anggrek', kategori: 'C', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 310, tx: 90, targetUpt: 3.0 },
+            { timestamp: '2026-07-05', nik: '1005', nama: 'Rian Hidayat', toko: 'Toko Melati', kategori: 'B', abm: 'Andi', bm: 'Bambang', shift: 'Pagi', qty: 45, tx: 40, targetUpt: 2.5 },
+            { timestamp: '2026-07-06', nik: '1006', nama: 'Ayu Kartika', toko: 'Toko Anggrek', kategori: 'C', abm: 'Rina', bm: 'Bambang', shift: 'Siang', qty: 190, tx: 50, targetUpt: 3.0 }
+        ];
+
+        let rawData = [];
+        let topChartInstance = null;
+        let bottomChartInstance = null;
+
+        // Load Data
+        function initDashboard() {
+            if (GOOGLE_SHEET_CSV_URL === "DUMMY_DATA") {
+                rawData = sampleData;
+                populateFilters();
+                renderDashboard();
+            } else {
+                Papa.parse(GOOGLE_SHEET_CSV_URL, {
+                    download: true,
+                    header: true,
+                    complete: function(results) {
+                        rawData = processSheetData(results.data);
+                        populateFilters();
+                        renderDashboard();
+                    }
+                });
+            }
+        }
+
+        function processSheetData(data) {
+            return data.map(item => ({
+                timestamp: item['Timestamp'] || item['Tanggal'] || '',
+                nik: item['NIK'] || '',
+                nama: item['Nama Karyawan'] || '',
+                toko: item['Nama Toko'] || '',
+                kategori: item['Kategori Grup Toko'] || 'Umum',
+                abm: item['ABM'] || '-',
+                bm: item['BM'] || '-',
+                shift: item['Shift'] || '-',
+                qty: parseFloat(item['Total Qty Sold'] || 0),
+                tx: parseFloat(item['Total Transaksi'] || 0),
+                targetUpt: parseFloat(item['Target UPT'] || 2.5)
+            }));
+        }
+
+        // Populasi Dropdown Filter
+        function populateFilters() {
+            const kategoriSet = new Set(rawData.map(d => d.kategori));
+            const abmSet = new Set(rawData.map(d => d.abm));
+            const bmSet = new Set(rawData.map(d => d.bm));
+
+            fillSelect('filterKategori', kategoriSet);
+            fillSelect('filterABM', abmSet);
+            fillSelect('filterBM', bmSet);
+
+            // Add Event Listeners
+            ['filterBulanTahun', 'filterKategori', 'filterABM', 'filterBM'].forEach(id => {
+                document.getElementById(id).addEventListener('change', renderDashboard);
+            });
+        }
+
+        function fillSelect(elementId, setValues) {
+            const select = document.getElementById(elementId);
+            setValues.forEach(val => {
+                if(val && val !== '-') {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.textContent = val;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        // Main Render Function
+        function renderDashboard() {
+            const bulanTahun = document.getElementById('filterBulanTahun').value;
+            const kat = document.getElementById('filterKategori').value;
+            const abm = document.getElementById('filterABM').value;
+            const bm = document.getElementById('filterBM').value;
+
+            // Filter Data
+            const filtered = rawData.filter(d => {
+                let matchDate = true;
+                if (bulanTahun && d.timestamp) {
+                    matchDate = d.timestamp.startsWith(bulanTahun);
+                }
+                const matchKat = !kat || d.kategori === kat;
+                const matchAbm = !abm || d.abm === abm;
+                const matchBm = !bm || d.bm === bm;
+                return matchDate && matchKat && matchAbm && matchBm;
+            });
+
+            // Hitung UPT per Baris Data
+            const processed = filtered.map(d => {
+                const upt = d.tx > 0 ? (d.qty / d.tx) : 0;
+                const pct = d.targetUpt > 0 ? ((upt / d.targetUpt) * 100) : 0;
+                return { ...d, upt, pct };
+            });
+
+            // Update Summary Cards
+            const totalQty = processed.reduce((acc, curr) => acc + curr.qty, 0);
+            const totalTx = processed.reduce((acc, curr) => acc + curr.tx, 0);
+            const avgUPT = totalTx > 0 ? (totalQty / totalTx) : 0;
+
+            document.getElementById('totalQty').textContent = totalQty.toLocaleString('id-ID');
+            document.getElementById('totalTx').textContent = totalTx.toLocaleString('id-ID');
+            document.getElementById('avgUPT').textContent = avgUPT.toFixed(2);
+
+            // Sort Top & Bottom
+            const sorted = [...processed].sort((a, b) => b.upt - a.upt);
+            const top3 = sorted.slice(0, 3);
+            const bottom3 = sorted.slice(-3).reverse();
+
+            renderCharts(top3, bottom3);
+            renderTable(processed);
+        }
+
+        // Render Charts Function
+        function renderCharts(top3, bottom3) {
+            if (topChartInstance) topChartInstance.destroy();
+            if (bottomChartInstance) bottomChartInstance.destroy();
+
+            // Top Chart
+            const ctxTop = document.getElementById('topChart').getContext('2d');
+            topChartInstance = new Chart(ctxTop, {
+                type: 'bar',
+                data: {
+                    labels: top3.map(d => `${d.nama} (${d.toko})`),
+                    datasets: [{
+                        label: 'UPT Actual',
+                        data: top3.map(d => d.upt.toFixed(2)),
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        borderColor: 'rgb(34, 197, 94)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Bottom Chart
+            const ctxBottom = document.getElementById('bottomChart').getContext('2d');
+            bottomChartInstance = new Chart(ctxBottom, {
+                type: 'bar',
+                data: {
+                    labels: bottom3.map(d => `${d.nama} (${d.toko})`),
+                    datasets: [{
+                        label: 'UPT Actual',
+                        data: bottom3.map(d => d.upt.toFixed(2)),
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgb(239, 68, 68)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        // Render Table Function
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(d => {
+                const tr = document.createElement('tr');
+                const isAchieved = d.pct >= 100;
+                tr.innerHTML = `
+                    <td class="px-4 py-2 font-mono text-xs">${d.nik}</td>
+                    <td class="px-4 py-2 font-medium text-gray-900">${d.nama}</td>
+                    <td class="px-4 py-2">${d.toko}</td>
+                    <td class="px-4 py-2">${d.shift}</td>
+                    <td class="px-4 py-2 text-right">${d.qty.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-2 text-right">${d.tx.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-2 text-right font-bold">${d.upt.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right text-gray-500">${d.targetUpt.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAchieved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${d.pct.toFixed(1)}%
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Initialize on Load
+        window.onload = initDashboard;
+    </script>
+</body>
+</html>
