@@ -19,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <style>
-        /* CSS Watermark Panda MR.D.I.Y. Menggunakan Elemen Img */
+        /* CSS Watermark Panda Background */
         .watermark-panda {
             position: fixed;
             top: 50%;
@@ -56,6 +56,7 @@
             border-color: rgba(99, 102, 241, 0.4) !important;
         }
 
+        /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -80,13 +81,67 @@
         table tbody tr:hover {
             background-color: rgba(99, 102, 241, 0.05) !important;
         }
+
+        /* Animation Modal */
+        @keyframes modalPop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-modal {
+            animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
 
-    <!-- ELEMEN WATERMARK PANDA (Direct Tag dengan ReferrerPolicy) -->
-    <img src="watermark.png" alt="Watermark" class="watermark-panda" />
+    <!-- ELEMEN WATERMARK PANDA BACKGROUND -->
+    <img src="watermark.png" alt="Watermark Panda" class="watermark-panda" />
 
+    <!-- MODAL LOGIN KEREN -->
+    <div id="loginModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 w-full max-w-sm p-6 relative overflow-hidden animate-modal text-center">
+            
+            <!-- Ornamen Dekorasi Gelombang -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/10 rounded-full blur-xl pointer-events-none"></div>
+
+            <!-- Logo Panda di Modal -->
+            <div class="mx-auto w-24 h-24 mb-3 flex items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 shadow-inner p-2">
+                <img src="watermark.png" alt="Logo Panda" class="max-h-full object-contain filter drop-shadow" />
+            </div>
+
+            <h3 class="text-xl font-extrabold text-slate-800 dark:text-white">Selamat Datang! 👋</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-5">Masukkan PIN Otentikasi untuk melanjutkan ke Dashboard UPT Performance.</p>
+
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">PIN / Password</label>
+                    <div class="relative">
+                        <input type="password" id="modalPasswordInput" placeholder="••••••••" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition text-slate-800 dark:text-white font-mono">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-semibold">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loginErrorMsg" class="hidden text-xs text-rose-500 font-medium bg-rose-50 dark:bg-rose-950/50 p-2 rounded-lg text-center border border-rose-200 dark:border-rose-900">
+                    ❌ PIN yang kamu masukkan salah!
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition transform active:scale-95 text-sm flex items-center justify-center gap-2">
+                        <span>🔑</span> Masuk Dashboard
+                    </button>
+                    
+                    <button type="button" onclick="loginAsGuest()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-semibold py-2 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5">
+                        <span>👤</span> Masuk Publik (Guest Mode)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
     <div id="dashboardContent" class="pb-12">
         <!-- HEADER NAVBAR -->
         <header class="custom-header text-white px-6 py-5 mb-6">
@@ -117,7 +172,7 @@
                     <button id="darkModeToggle" onclick="toggleDarkMode()" class="text-xs font-medium bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 transition flex items-center gap-1.5">
                         <span id="themeIcon">🌙</span> <span id="themeText">Dark</span>
                     </button>
-                    <button type="button" onclick="loginPrompt()" class="text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-slate-900 px-3 py-1.5 rounded-lg shadow-md transition border border-amber-300">
+                    <button type="button" onclick="showLoginModal()" class="text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-slate-900 px-3 py-1.5 rounded-lg shadow-md transition border border-amber-300">
                         🔑 Switch Access
                     </button>
                 </div>
@@ -271,26 +326,54 @@
         window.onload = function() {
             let role = sessionStorage.getItem("userRole");
             if (!role) {
-                loginPrompt();
+                showLoginModal();
             } else {
                 applyRolePermissions(role);
                 initDashboard();
             }
         };
 
-        function loginPrompt() {
-            let inputPin = prompt("Masukkan Kata Sandi (guest / admin):");
-            if (inputPin === ADMIN_PIN) {
+        /* MODAL LOGIC */
+        function showLoginModal() {
+            document.getElementById("modalPasswordInput").value = "";
+            document.getElementById("loginErrorMsg").classList.add("hidden");
+            document.getElementById("loginModal").classList.remove("hidden");
+            setTimeout(() => document.getElementById("modalPasswordInput").focus(), 100);
+        }
+
+        function hideLoginModal() {
+            document.getElementById("loginModal").classList.add("hidden");
+        }
+
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById("modalPasswordInput");
+            pwd.type = (pwd.type === "password") ? "text" : "password";
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const val = document.getElementById("modalPasswordInput").value.trim();
+            const err = document.getElementById("loginErrorMsg");
+
+            if (val === ADMIN_PIN) {
                 sessionStorage.setItem("userRole", "admin");
                 applyRolePermissions("admin");
-            } else if (inputPin === GUEST_PIN) {
+                hideLoginModal();
+                initDashboard();
+            } else if (val === GUEST_PIN) {
                 sessionStorage.setItem("userRole", "guest");
                 applyRolePermissions("guest");
+                hideLoginModal();
+                initDashboard();
             } else {
-                alert("Kata sandi salah/kosong. Otomatis masuk sebagai Guest.");
-                sessionStorage.setItem("userRole", "guest");
-                applyRolePermissions("guest");
+                err.classList.remove("hidden");
             }
+        }
+
+        function loginAsGuest() {
+            sessionStorage.setItem("userRole", "guest");
+            applyRolePermissions("guest");
+            hideLoginModal();
             initDashboard();
         }
 
