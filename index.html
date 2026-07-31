@@ -90,6 +90,14 @@
         .animate-modal {
             animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+        /* Leaderboard Item Hover Effect */
+        .lb-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .lb-item:hover {
+            transform: translateX(4px);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
@@ -265,20 +273,32 @@
                 </div>
             </div>
 
-            <!-- DUA GRAFIK MINI (TOP & BOTTOM STAFF) -->
+            <!-- LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- TOP 3 LEADERBOARD -->
                 <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <h2 class="font-bold text-sm text-emerald-600 dark:text-emerald-400 mb-3 flex items-center gap-2">
-                        <span>🏆</span> Top 3 Staff (Rata-rata UPT)
-                    </h2>
-                    <div class="relative h-56"><canvas id="topChart"></canvas></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-base text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                            <span>🏆</span> Top 3 Performers Staff
+                        </h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-full">High UPT</span>
+                    </div>
+                    <div id="top3Leaderboard" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
 
+                <!-- BOTTOM 3 LEADERBOARD -->
                 <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <h2 class="font-bold text-sm text-rose-500 mb-3 flex items-center gap-2">
-                        <span>⚠️</span> Bottom 3 Staff (Rata-rata UPT)
-                    </h2>
-                    <div class="relative h-56"><canvas id="bottomChart"></canvas></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-base text-rose-500 flex items-center gap-2">
+                            <span>⚠️</span> Bottom 3 Need Improvement
+                        </h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 px-2.5 py-1 rounded-full">Low UPT</span>
+                    </div>
+                    <div id="bottom3Leaderboard" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
 
@@ -411,8 +431,6 @@
 
         let rawData = [];
         let storeChartInstance = null;
-        let topChartInstance = null;
-        let bottomChartInstance = null;
 
         function initDashboard() {
             Papa.parse(GOOGLE_SHEET_CSV_URL, {
@@ -567,7 +585,7 @@
             const bottom3 = sortedStaff.slice(-3).reverse();
 
             renderStorePerformance(aggregatedStores);
-            renderStaffCharts(top3, bottom3);
+            renderLeaderboards(top3, bottom3);
             renderTable(processed);
         }
 
@@ -676,75 +694,95 @@
             });
         }
 
-        function renderStaffCharts(top3, bottom3) {
-            if (topChartInstance) topChartInstance.destroy();
-            if (bottomChartInstance) bottomChartInstance.destroy();
+        /* RENDER LEADERBOARD INTERAKTIF (SUBSTITUTE FOR CHART) */
+        function renderLeaderboards(top3, bottom3) {
+            const topContainer = document.getElementById('top3Leaderboard');
+            const bottomContainer = document.getElementById('bottom3Leaderboard');
 
-            const ctxTop = document.getElementById('topChart').getContext('2d');
-            topChartInstance = new Chart(ctxTop, {
-                type: 'bar',
-                data: {
-                    labels: top3.map(d => `${d.nama} (${d.toko})`),
-                    datasets: [{
-                        label: 'Rata-rata UPT',
-                        data: top3.map(d => d.avgUpt.toFixed(2)),
-                        backgroundColor: 'rgba(72, 209, 204, 0.45)',
-                        borderColor: 'rgba(56, 178, 172, 1)',
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        barPercentage: 0.55
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    layout: { padding: { top: 25 } },
-                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } } },
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (val) => `⭐ ${parseFloat(val).toFixed(2)}`,
-                            color: '#047857'
-                        }
-                    }
-                }
-            });
+            // Render Top 3
+            topContainer.innerHTML = '';
+            if (top3.length === 0) {
+                topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
+            } else {
+                const medals = [
+                    { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
+                    { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
+                    { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
+                ];
 
-            const ctxBottom = document.getElementById('bottomChart').getContext('2d');
-            bottomChartInstance = new Chart(ctxBottom, {
-                type: 'bar',
-                data: {
-                    labels: bottom3.map(d => `${d.nama} (${d.toko})`),
-                    datasets: [{
-                        label: 'Rata-rata UPT',
-                        data: bottom3.map(d => d.avgUpt.toFixed(2)),
-                        backgroundColor: 'rgba(255, 107, 107, 0.45)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        barPercentage: 0.55
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    layout: { padding: { top: 25 } },
-                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } } },
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (val) => `📌 ${parseFloat(val).toFixed(2)}`,
-                            color: '#be123c'
-                        }
-                    }
-                }
-            });
+                top3.forEach((item, idx) => {
+                    const style = medals[idx] || medals[2];
+                    const isAchieve = item.avgPct >= 100;
+
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🏬 Cabang: <strong>${item.toko}</strong></span>
+                                    <span>•</span>
+                                    <span>Qty: <strong>${item.totalQty}</strong></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                                ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                                ${item.avgPct.toFixed(0)}% Target
+                            </span>
+                        </div>
+                    `;
+                    topContainer.appendChild(div);
+                });
+            }
+
+            // Render Bottom 3
+            bottomContainer.innerHTML = '';
+            if (bottom3.length === 0) {
+                bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
+            } else {
+                bottom3.forEach((item, idx) => {
+                    const rankNum = bottom3.length - idx; // urutan 3, 2, 1 terendah
+                    const isAchieve = item.avgPct >= 100;
+
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border border-rose-200/80 bg-rose-50/50 dark:bg-rose-950/20 dark:border-rose-900/50 shadow-sm`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-300 font-extrabold text-xs flex items-center justify-center border border-rose-300 dark:border-rose-700">
+                                #${rankNum}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🏬 Cabang: <strong>${item.toko}</strong></span>
+                                    <span>•</span>
+                                    <span>Qty: <strong>${item.totalQty}</strong></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
+                                ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                                ${item.avgPct.toFixed(0)}% Target
+                            </span>
+                        </div>
+                    `;
+                    bottomContainer.appendChild(div);
+                });
+            }
         }
 
         function renderTable(data) {
