@@ -302,11 +302,42 @@
                 </div>
             </div>
 
-            <!-- TABEL RINCIAN KASIR -->
+            <!-- PERINGKAT KESELURUHAN STAFF (RANK 4 DST) -->
+            <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-base flex items-center gap-2">
+                        <span>🎖️</span> Peringkat Keseluruhan Staff (Rank 4+)
+                    </h2>
+                    <span class="text-xs text-slate-400">Diurutkan Berdasarkan UPT</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100/80 dark:bg-slate-700/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
+                            <tr>
+                                <th class="p-3 text-center">Rank</th>
+                                <th class="p-3">Nama Staff</th>
+                                <th class="p-3">Store</th>
+                                <th class="p-3 text-right">Total Qty</th>
+                                <th class="p-3 text-right">Total Tx</th>
+                                <th class="p-3 text-right">UPT Actual</th>
+                                <th class="p-3 text-center">% Capaian Target</th>
+                            </tr>
+                        </thead>
+                        <tbody id="restStaffTableBody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABEL RINCIAN KASIR (HARI BERJALAN) -->
             <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden p-5">
-                <h2 class="font-bold text-base mb-4 flex items-center gap-2">
-                    <span>📋</span> Rincian Performa Kasir
-                </h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-base flex items-center gap-2">
+                        <span>📋</span> Rincian Performa Kasir (Hari Berjalan)
+                    </h2>
+                    <span id="todayBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        Today Only
+                    </span>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100/80 dark:bg-slate-700/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
@@ -445,14 +476,15 @@
         }
 
         function parseTimestamp(tsStr) {
-            if (!tsStr) return { raw: '-', monthYear: '' };
+            if (!tsStr) return { raw: '-', monthYear: '', dateOnly: null };
             let d = new Date(tsStr);
             if (!isNaN(d.getTime())) {
                 let yyyy = d.getFullYear();
                 let mm = String(d.getMonth() + 1).padStart(2, '0');
-                return { raw: tsStr, monthYear: `${yyyy}-${mm}` };
+                let dd = String(d.getDate()).padStart(2, '0');
+                return { raw: tsStr, monthYear: `${yyyy}-${mm}`, dateOnly: `${yyyy}-${mm}-${dd}` };
             }
-            return { raw: tsStr, monthYear: '' };
+            return { raw: tsStr, monthYear: '', dateOnly: null };
         }
 
         function processSheetData(data) {
@@ -479,8 +511,9 @@
                 return {
                     timestamp: parsedTs.raw,
                     monthYear: parsedTs.monthYear,
+                    dateOnly: parsedTs.dateOnly,
                     nama: getItem(['Nama Kasir', 'Nama Staff', 'Nama Karyawan', 'Nama']) || 'Kasir',
-                    toko: getItem(['Nama Toko', 'Toko', 'Store']) || 'Toko',
+                    toko: getItem(['Nama Toko', 'Toko', 'Cabang']) || 'Toko',
                     kategori: getItem(['Kategori Grup Toko', 'Kategori Toko', 'Kategori']) || 'Umum',
                     abm: getItem(['ABM', 'Asst. Branch Manager']) || '-',
                     bm: getItem(['BM', 'Branch Manager']) || '-',
@@ -586,7 +619,8 @@
 
             renderStorePerformance(aggregatedStores);
             renderLeaderboards(top3, bottom3);
-            renderTable(processed);
+            renderRestStaffTable(sortedStaff);
+            renderTodayTable(processed);
         }
 
         function renderStorePerformance(storesData) {
@@ -694,7 +728,7 @@
             });
         }
 
-        /* RENDER LEADERBOARD INTERAKTIF (SUBSTITUTE FOR CHART) */
+        /* RENDER LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) */
         function renderLeaderboards(top3, bottom3) {
             const topContainer = document.getElementById('top3Leaderboard');
             const bottomContainer = document.getElementById('bottom3Leaderboard');
@@ -750,7 +784,7 @@
                 bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
             } else {
                 bottom3.forEach((item, idx) => {
-                    const rankNum = bottom3.length - idx; // urutan 3, 2, 1 terendah
+                    const rankNum = bottom3.length - idx;
                     const isAchieve = item.avgPct >= 100;
 
                     const div = document.createElement('div');
@@ -785,11 +819,68 @@
             }
         }
 
-        function renderTable(data) {
+        /* RENDER PERINGKAT KESELURUHAN STAFF (MULAI RANK 4 DST) */
+        function renderRestStaffTable(sortedStaff) {
+            const tbody = document.getElementById('restStaffTableBody');
+            tbody.innerHTML = '';
+
+            if (sortedStaff.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400">Tidak ada data staff.</td></tr>`;
+                return;
+            }
+
+            sortedStaff.forEach((s, idx) => {
+                const rank = idx + 1;
+                const isAchieve = s.avgPct >= 100;
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold">
+                        <span class="inline-block px-2 py-0.5 rounded ${rank <= 3 ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 font-extrabold' : 'text-slate-500'}">
+                            ${rank <= 3 ? '🏆 #' + rank : '#' + rank}
+                        </span>
+                    </td>
+                    <td class="p-3 font-semibold">${s.nama}</td>
+                    <td class="p-3 text-slate-500 dark:text-slate-400">${s.toko}</td>
+                    <td class="p-3 text-right">${s.totalQty.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-right">${s.totalTx.toLocaleString('id-ID')}</td>
+                    <td class="p-3 text-right font-bold text-indigo-600 dark:text-indigo-400">${s.avgUpt.toFixed(2)}</td>
+                    <td class="p-3 text-center">
+                        <span class="px-2 py-0.5 rounded text-xs font-bold ${isAchieve ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}">
+                            ${s.avgPct.toFixed(1)}%
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* RENDER RINCIAN PERFORMA KASIR (HANYA HARI BERJALAN / TODAY) */
+        function renderTodayTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            data.forEach(d => {
+            // Dapatkan tanggal hari ini dalam format YYYY-MM-DD
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            // Filter data agar hanya menampilkan transaksi HARI INI
+            const todayData = data.filter(d => d.dateOnly === todayStr);
+
+            if (todayData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="p-8 text-center text-slate-400 text-xs font-medium">
+                            📂 Belum ada data transaksi yang diinput untuk hari ini (${todayStr}).
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            todayData.forEach(d => {
                 const tr = document.createElement('tr');
                 const isAchieved = d.pct >= 100;
                 const estLevel = getBestEstimateLevel(d.pct);
