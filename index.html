@@ -331,15 +331,16 @@
                 </div>
             </div>
 
-            <!-- TABEL RINCIAN KASIR (HARI BERJALAN) -->
+            <!-- TABEL RINCIAN KASIR (DAPAT DIFILTER PER TANGGAL) -->
             <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden p-5">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <h2 class="font-bold text-base flex items-center gap-2">
-                        <span>📋</span> Rincian Performa Kasir (Hari Berjalan)
+                        <span>📋</span> Rincian Performa Kasir
                     </h2>
-                    <span id="todayBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                        Today Only
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <label for="filterTanggalKasir" class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Pilih Tanggal:</label>
+                        <input type="date" id="filterTanggalKasir" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 dark:text-white">
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
@@ -530,6 +531,16 @@
         }
 
         function populateFilters() {
+            // Set tanggal default ke HARI INI pada filter tanggal kasir jika belum terisi
+            const filterTanggalInput = document.getElementById('filterTanggalKasir');
+            if (filterTanggalInput && !filterTanggalInput.value) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                filterTanggalInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+
             const kategoriSet = new Set(rawData.map(d => d.kategori));
             const abmSet = new Set(rawData.map(d => d.abm));
             const bmSet = new Set(rawData.map(d => d.bm));
@@ -538,8 +549,9 @@
             fillSelect('filterABM', abmSet);
             fillSelect('filterBM', bmSet);
 
-            ['filterBulanTahun', 'filterKategori', 'filterABM', 'filterBM'].forEach(id => {
-                document.getElementById(id).addEventListener('change', renderDashboard);
+            ['filterBulanTahun', 'filterKategori', 'filterABM', 'filterBM', 'filterTanggalKasir'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderDashboard);
             });
         }
 
@@ -754,104 +766,103 @@
         }
 
         /* RENDER LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) */
-        /* RENDER LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) */
-function renderLeaderboards(top3, bottom3) {
-    const topContainer = document.getElementById('top3Leaderboard');
-    const bottomContainer = document.getElementById('bottom3Leaderboard');
+        function renderLeaderboards(top3, bottom3) {
+            const topContainer = document.getElementById('top3Leaderboard');
+            const bottomContainer = document.getElementById('bottom3Leaderboard');
 
-    // Render Top 3
-    topContainer.innerHTML = '';
-    if (top3.length === 0) {
-        topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
-    } else {
-        const medals = [
-            { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
-            { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
-            { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
-        ];
+            // Render Top 3
+            topContainer.innerHTML = '';
+            if (top3.length === 0) {
+                topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
+            } else {
+                const medals = [
+                    { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
+                    { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
+                    { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
+                ];
 
-        top3.forEach((item, idx) => {
-            const style = medals[idx] || medals[2];
-            const isAchieve = item.avgPct >= 100;
+                top3.forEach((item, idx) => {
+                    const style = medals[idx] || medals[2];
+                    const isAchieve = item.avgPct >= 100;
 
-            const div = document.createElement('div');
-            div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
-            
-            div.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">${style.icon}</span>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
-                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
+                                    <span>•</span>
+                                    <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
+                                </p>
+                            </div>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
-                            <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
-                            <span>•</span>
-                            <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-                        ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
-                        Score: ${item.finalScore.toFixed(1)} pts
-                    </span>
-                </div>
-            `;
-            topContainer.appendChild(div);
-        });
-    }
-
-    // Render Bottom 3
-    bottomContainer.innerHTML = '';
-    if (bottom3.length === 0) {
-        bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
-    } else {
-        // Menambahkan array style khusus untuk Bottom 3 agar langsung dikenali
-        const bottomStyles = [
-            { label: 'Terendah #1', icon: '🚩', bg: 'bg-rose-100/90 border-rose-400 dark:bg-rose-950/60 dark:border-rose-700', badge: 'bg-rose-600 text-white' },
-            { label: 'Terendah #2', icon: '📉', bg: 'bg-rose-50/80 border-rose-300 dark:bg-rose-900/40 dark:border-rose-800', badge: 'bg-rose-500 text-white' },
-            { label: 'Terendah #3', icon: '⚠️', bg: 'bg-orange-50/80 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/50', badge: 'bg-orange-500 text-white' }
-        ];
-
-        bottom3.forEach((item, idx) => {
-            const style = bottomStyles[idx] || bottomStyles[2];
-            const isAchieve = item.avgPct >= 100;
-
-            const div = document.createElement('div');
-            div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
-            
-            div.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">${style.icon}</span>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
-                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.label}</span>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                                ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                                Score: ${item.finalScore.toFixed(1)} pts
+                            </span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
-                            <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
-                            <span>•</span>
-                            <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
-                        ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
-                        Score: ${item.finalScore.toFixed(1)} pts
-                    </span>
-                </div>
-            `;
-            bottomContainer.appendChild(div);
-        });
-    }
-}
+                    `;
+                    topContainer.appendChild(div);
+                });
+            }
+
+            // Render Bottom 3
+            bottomContainer.innerHTML = '';
+            if (bottom3.length === 0) {
+                bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
+            } else {
+                const bottomStyles = [
+                    { label: 'Terendah #1', icon: '🚩', bg: 'bg-rose-100/90 border-rose-400 dark:bg-rose-950/60 dark:border-rose-700', badge: 'bg-rose-600 text-white' },
+                    { label: 'Terendah #2', icon: '📉', bg: 'bg-rose-50/80 border-rose-300 dark:bg-rose-900/40 dark:border-rose-800', badge: 'bg-rose-500 text-white' },
+                    { label: 'Terendah #3', icon: '⚠️', bg: 'bg-orange-50/80 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/50', badge: 'bg-orange-500 text-white' }
+                ];
+
+                bottom3.forEach((item, idx) => {
+                    const style = bottomStyles[idx] || bottomStyles[2];
+                    const isAchieve = item.avgPct >= 100;
+
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.label}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
+                                    <span>•</span>
+                                    <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
+                                ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                                Score: ${item.finalScore.toFixed(1)} pts
+                            </span>
+                        </div>
+                    `;
+                    bottomContainer.appendChild(div);
+                });
+            }
+        }
+
         /* RENDER PERINGKAT KESELURUHAN STAFF (MULAI RANK 4 DST) */
         function renderRestStaffTable(sortedStaff) {
             const tbody = document.getElementById('restStaffTableBody');
@@ -889,32 +900,28 @@ function renderLeaderboards(top3, bottom3) {
             });
         }
 
-        /* RENDER RINCIAN PERFORMA KASIR (HANYA HARI BERJALAN / TODAY) */
+        /* RENDER RINCIAN PERFORMA KASIR PER TANGGAL (DAPAT DIFILTER) */
         function renderTodayTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            // Dapatkan tanggal hari ini dalam format YYYY-MM-DD
-            const now = new Date();
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            const todayStr = `${yyyy}-${mm}-${dd}`;
+            // Ambil tanggal dari input date picker
+            const selectedDate = document.getElementById('filterTanggalKasir').value;
 
-            // Filter data agar hanya menampilkan transaksi HARI INI
-            const todayData = data.filter(d => d.dateOnly === todayStr);
+            // Jika ada tanggal yang dipilih, filter data. Jika kosong/dihapus, tampilkan semua data.
+            const filteredData = selectedDate ? data.filter(d => d.dateOnly === selectedDate) : data;
 
-            if (todayData.length === 0) {
+            if (filteredData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="10" class="p-8 text-center text-slate-400 text-xs font-medium">
-                            📂 Belum ada data transaksi yang diinput untuk hari ini (${todayStr}).
+                            📂 Belum ada data transaksi yang diinput untuk tanggal ${selectedDate || 'yang dipilih'}.
                         </td>
                     </tr>`;
                 return;
             }
 
-            todayData.forEach(d => {
+            filteredData.forEach(d => {
                 const tr = document.createElement('tr');
                 const isAchieved = d.pct >= 100;
                 const estLevel = getBestEstimateLevel(d.pct);
