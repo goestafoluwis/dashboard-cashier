@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+def generate_html():
+    html = """<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -273,6 +274,35 @@
                 </div>
             </div>
 
+            <!-- LEADERBOARD TOKO (TOP 3 & BOTTOM 3) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                <!-- TOP 3 TOKO -->
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-base text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                            <span>🏬🏆</span> Top 3 Performa Toko
+                        </h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-full">% Tertinggi</span>
+                    </div>
+                    <div id="top3StoreLeaderboard" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- BOTTOM 3 TOKO -->
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-base text-rose-500 flex items-center gap-2">
+                            <span>🏬⚠️</span> Bottom 3 Toko
+                        </h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 px-2.5 py-1 rounded-full">% Terendah</span>
+                    </div>
+                    <div id="bottom3StoreLeaderboard" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
             <!-- LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- TOP 3 LEADERBOARD -->
@@ -331,16 +361,15 @@
                 </div>
             </div>
 
-            <!-- TABEL RINCIAN KASIR (DAPAT DIFILTER PER TANGGAL) -->
+            <!-- TABEL RINCIAN KASIR (HARI BERJALAN) -->
             <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden p-5">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div class="flex items-center justify-between mb-4">
                     <h2 class="font-bold text-base flex items-center gap-2">
-                        <span>📋</span> Rincian Performa Kasir
+                        <span>📋</span> Rincian Performa Kasir (Hari Berjalan)
                     </h2>
-                    <div class="flex items-center gap-2">
-                        <label for="filterTanggalKasir" class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Pilih Tanggal:</label>
-                        <input type="date" id="filterTanggalKasir" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 dark:text-white">
-                    </div>
+                    <span id="todayBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        Today Only
+                    </span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
@@ -376,7 +405,7 @@
         const GOOGLE_SHEET_DATABASE_URL = "https://docs.google.com/spreadsheets/d/1q1a3yXAF-WP5TKZ6EkkMzY6ZKuk7gW1CidryBFebFRU/edit?resourcekey=&gid=1559517639#gid=1559517639"; 
         
         const rawCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pubhtml";
-        const GOOGLE_SHEET_CSV_URL = rawCsvUrl.replace('/pubhtml', '/pub?output=csv');
+        const GOOGLE_SHEET_CSV_URL = rawCsvUrl.replace('/pubhtml', '/pub?output=csv') + "&t=" + new Date().getTime();
 
         window.onload = function() {
             let role = sessionStorage.getItem("userRole");
@@ -531,16 +560,6 @@
         }
 
         function populateFilters() {
-            // Set tanggal default ke HARI INI pada filter tanggal kasir jika belum terisi
-            const filterTanggalInput = document.getElementById('filterTanggalKasir');
-            if (filterTanggalInput && !filterTanggalInput.value) {
-                const now = new Date();
-                const yyyy = now.getFullYear();
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const dd = String(now.getDate()).padStart(2, '0');
-                filterTanggalInput.value = `${yyyy}-${mm}-${dd}`;
-            }
-
             const kategoriSet = new Set(rawData.map(d => d.kategori));
             const abmSet = new Set(rawData.map(d => d.abm));
             const bmSet = new Set(rawData.map(d => d.bm));
@@ -549,9 +568,8 @@
             fillSelect('filterABM', abmSet);
             fillSelect('filterBM', bmSet);
 
-            ['filterBulanTahun', 'filterKategori', 'filterABM', 'filterBM', 'filterTanggalKasir'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('change', renderDashboard);
+            ['filterBulanTahun', 'filterKategori', 'filterABM', 'filterBM'].forEach(id => {
+                document.getElementById(id).addEventListener('change', renderDashboard);
             });
         }
 
@@ -654,7 +672,14 @@
             const top3 = sortedStaff.slice(0, 3);
             const bottom3 = sortedStaff.slice(-3).reverse();
 
+            // --- KODE BARU UNTUK SORTING TOKO ---
+            const sortedStores = [...aggregatedStores].sort((a, b) => b.pctCapaian - a.pctCapaian);
+            const top3Stores = sortedStores.slice(0, 3);
+            const bottom3Stores = sortedStores.slice(-3).reverse(); 
+            // ------------------------------------
+
             renderStorePerformance(aggregatedStores);
+            renderStoreLeaderboards(top3Stores, bottom3Stores);
             renderLeaderboards(top3, bottom3);
             renderRestStaffTable(sortedStaff);
             renderTodayTable(processed);
@@ -900,28 +925,30 @@
             });
         }
 
-        /* RENDER RINCIAN PERFORMA KASIR PER TANGGAL (DAPAT DIFILTER) */
+        /* RENDER RINCIAN PERFORMA KASIR (HANYA HARI BERJALAN / TODAY) */
         function renderTodayTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            // Ambil tanggal dari input date picker
-            const selectedDate = document.getElementById('filterTanggalKasir').value;
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
 
-            // Jika ada tanggal yang dipilih, filter data. Jika kosong/dihapus, tampilkan semua data.
-            const filteredData = selectedDate ? data.filter(d => d.dateOnly === selectedDate) : data;
+            const todayData = data.filter(d => d.dateOnly === todayStr);
 
-            if (filteredData.length === 0) {
+            if (todayData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="10" class="p-8 text-center text-slate-400 text-xs font-medium">
-                            📂 Belum ada data transaksi yang diinput untuk tanggal ${selectedDate || 'yang dipilih'}.
+                            📂 Belum ada data transaksi yang diinput untuk hari ini (${todayStr}).
                         </td>
                     </tr>`;
                 return;
             }
 
-            filteredData.forEach(d => {
+            todayData.forEach(d => {
                 const tr = document.createElement('tr');
                 const isAchieved = d.pct >= 100;
                 const estLevel = getBestEstimateLevel(d.pct);
@@ -948,6 +975,96 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        /* RENDER LEADERBOARD TOKO (TOP 3 & BOTTOM 3) */
+        function renderStoreLeaderboards(top3, bottom3) {
+            const topContainer = document.getElementById('top3StoreLeaderboard');
+            const bottomContainer = document.getElementById('bottom3StoreLeaderboard');
+
+            // Render Top 3 Toko
+            topContainer.innerHTML = '';
+            if (top3.length === 0) {
+                topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data toko.</p>`;
+            } else {
+                const medals = [
+                    { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
+                    { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
+                    { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
+                ];
+
+                top3.forEach((item, idx) => {
+                    const style = medals[idx] || medals[2];
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.toko}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🎯 Target Level 1: <strong>${item.targetLvl1.toFixed(2)}</strong></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                                ${item.pctCapaian.toFixed(1)}% <span class="text-[10px] font-semibold text-slate-400">Achieve</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200">
+                                Actual UPT: ${item.uptActual.toFixed(2)}
+                            </span>
+                        </div>
+                    `;
+                    topContainer.appendChild(div);
+                });
+            }
+
+            // Render Bottom 3 Toko
+            bottomContainer.innerHTML = '';
+            if (bottom3.length === 0) {
+                bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data toko.</p>`;
+            } else {
+                const bottomStyles = [
+                    { label: 'Terendah #1', icon: '🚩', bg: 'bg-rose-100/90 border-rose-400 dark:bg-rose-950/60 dark:border-rose-700', badge: 'bg-rose-600 text-white' },
+                    { label: 'Terendah #2', icon: '📉', bg: 'bg-rose-50/80 border-rose-300 dark:bg-rose-900/40 dark:border-rose-800', badge: 'bg-rose-500 text-white' },
+                    { label: 'Terendah #3', icon: '⚠️', bg: 'bg-orange-50/80 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/50', badge: 'bg-orange-500 text-white' }
+                ];
+
+                bottom3.forEach((item, idx) => {
+                    const style = bottomStyles[idx] || bottomStyles[2];
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.toko}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.label}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🎯 Target Level 1: <strong>${item.targetLvl1.toFixed(2)}</strong></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
+                                ${item.pctCapaian.toFixed(1)}% <span class="text-[10px] font-semibold text-slate-400">Achieve</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200">
+                                Actual UPT: ${item.uptActual.toFixed(2)}
+                            </span>
+                        </div>
+                    `;
+                    bottomContainer.appendChild(div);
+                });
+            }
         }
 
         function updateRealtimeClock() {
@@ -983,4 +1100,9 @@
         }
     </script>
 </body>
-</html>
+</html>"""
+    
+    with open("index_updated_BEST_CASHIER.html", "w", encoding="utf-8") as f:
+        f.write(html)
+        
+generate_html()
