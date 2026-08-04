@@ -273,6 +273,35 @@
                 </div>
             </div>
 
+            <!-- LEADERBOARD TOKO (TOP 3 & BOTTOM 3 TOKO) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- TOP 3 TOKO LEADERBOARD -->
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-base text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                            <span>🏆</span> Top 3 Performers Toko
+                        </h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-full">High UPT</span>
+                    </div>
+                    <div id="top3StoreLeaderboard" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- BOTTOM 3 TOKO LEADERBOARD -->
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-base text-rose-500 flex items-center gap-2">
+                            <span>⚠️</span> Bottom 3 Need Improvement Toko
+                        </h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 px-2.5 py-1 rounded-full">Low UPT</span>
+                    </div>
+                    <div id="bottom3StoreLeaderboard" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
             <!-- LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- TOP 3 LEADERBOARD -->
@@ -643,19 +672,25 @@
                 const shiftPct = (s.totalShift / maxShift) * 100;
                 const txPct = (s.totalTx / maxTx) * 100;
 
-                // RUMUS BARU: 60% UPT + 25% Jumlah Trx + 15% Jumlah Shift
+                // RUMUS: 60% UPT + 25% Jumlah Trx + 15% Jumlah Shift
                 const finalScore = (avgPct * 0.6) + (txPct * 0.25) + (shiftPct * 0.15);
 
                 return { ...s, avgUpt, avgPct, finalScore };
             });
 
-            // Urutkan berdasarkan Final Score Terbaru
+            // Urutkan Staff berdasarkan Final Score
             const sortedStaff = [...aggregatedStaff].sort((a, b) => b.finalScore - a.finalScore);
-            const top3 = sortedStaff.slice(0, 3);
-            const bottom3 = sortedStaff.slice(-3).reverse();
+            const top3Staff = sortedStaff.slice(0, 3);
+            const bottom3Staff = sortedStaff.slice(-3).reverse();
+
+            // Urutkan Toko berdasarkan Persentase Capaian Toko
+            const sortedStores = [...aggregatedStores].sort((a, b) => b.pctCapaian - a.pctCapaian);
+            const top3Stores = sortedStores.slice(0, 3);
+            const bottom3Stores = sortedStores.slice(-3).reverse();
 
             renderStorePerformance(aggregatedStores);
-            renderLeaderboards(top3, bottom3);
+            renderStoreLeaderboards(top3Stores, bottom3Stores);
+            renderLeaderboards(top3Staff, bottom3Staff);
             renderRestStaffTable(sortedStaff);
             renderTodayTable(processed);
         }
@@ -765,12 +800,110 @@
             });
         }
 
+        /* RENDER LEADERBOARD TOKO (TOP 3 & BOTTOM 3) */
+        function renderStoreLeaderboards(top3, bottom3) {
+            const topContainer = document.getElementById('top3StoreLeaderboard');
+            const bottomContainer = document.getElementById('bottom3StoreLeaderboard');
+
+            // Render Top 3 Store
+            topContainer.innerHTML = '';
+            if (top3.length === 0) {
+                topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data toko.</p>`;
+            } else {
+                const medals = [
+                    { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
+                    { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
+                    { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
+                ];
+
+                top3.forEach((item, idx) => {
+                    const style = medals[idx] || medals[2];
+                    const isAchieve = item.pctCapaian >= 100;
+
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.toko}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🛒 <strong>${item.totalTx.toLocaleString('id-ID')}</strong> Trx</span>
+                                    <span>•</span>
+                                    <span>🛍️ <strong>${item.totalQty.toLocaleString('id-ID')}</strong> Qty</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                                ${item.uptActual.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                                Capaian: ${item.pctCapaian.toFixed(1)}%
+                            </span>
+                        </div>
+                    `;
+                    topContainer.appendChild(div);
+                });
+            }
+
+            // Render Bottom 3 Store
+            bottomContainer.innerHTML = '';
+            if (bottom3.length === 0) {
+                bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data toko.</p>`;
+            } else {
+                const bottomStyles = [
+                    { label: 'Terendah #1', icon: '🚩', bg: 'bg-rose-100/90 border-rose-400 dark:bg-rose-950/60 dark:border-rose-700', badge: 'bg-rose-600 text-white' },
+                    { label: 'Terendah #2', icon: '📉', bg: 'bg-rose-50/80 border-rose-300 dark:bg-rose-900/40 dark:border-rose-800', badge: 'bg-rose-500 text-white' },
+                    { label: 'Terendah #3', icon: '⚠️', bg: 'bg-orange-50/80 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/50', badge: 'bg-orange-500 text-white' }
+                ];
+
+                bottom3.forEach((item, idx) => {
+                    const style = bottomStyles[idx] || bottomStyles[2];
+                    const isAchieve = item.pctCapaian >= 100;
+
+                    const div = document.createElement('div');
+                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${style.icon}</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.toko}</h4>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.label}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>🛒 <strong>${item.totalTx.toLocaleString('id-ID')}</strong> Trx</span>
+                                    <span>•</span>
+                                    <span>🛍️ <strong>${item.totalQty.toLocaleString('id-ID')}</strong> Qty</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
+                                ${item.uptActual.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                                Capaian: ${item.pctCapaian.toFixed(1)}%
+                            </span>
+                        </div>
+                    `;
+                    bottomContainer.appendChild(div);
+                });
+            }
+        }
+
         /* RENDER LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) */
         function renderLeaderboards(top3, bottom3) {
             const topContainer = document.getElementById('top3Leaderboard');
             const bottomContainer = document.getElementById('bottom3Leaderboard');
 
-            // Render Top 3
+            // Render Top 3 Staff
             topContainer.innerHTML = '';
             if (top3.length === 0) {
                 topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
@@ -816,7 +949,7 @@
                 });
             }
 
-            // Render Bottom 3
+            // Render Bottom 3 Staff
             bottomContainer.innerHTML = '';
             if (bottom3.length === 0) {
                 bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
