@@ -754,98 +754,104 @@
         }
 
         /* RENDER LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) */
-        function renderLeaderboards(top3, bottom3) {
-            const topContainer = document.getElementById('top3Leaderboard');
-            const bottomContainer = document.getElementById('bottom3Leaderboard');
+        /* RENDER LEADERBOARD INTERAKTIF (TOP 3 & BOTTOM 3 STAFF) */
+function renderLeaderboards(top3, bottom3) {
+    const topContainer = document.getElementById('top3Leaderboard');
+    const bottomContainer = document.getElementById('bottom3Leaderboard');
 
-            // Render Top 3
-            topContainer.innerHTML = '';
-            if (top3.length === 0) {
-                topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
-            } else {
-                const medals = [
-                    { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
-                    { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
-                    { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
-                ];
+    // Render Top 3
+    topContainer.innerHTML = '';
+    if (top3.length === 0) {
+        topContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
+    } else {
+        const medals = [
+            { rank: 'Rank 1', icon: '🥇', bg: 'bg-amber-100/80 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50', badge: 'bg-amber-400 text-slate-900' },
+            { rank: 'Rank 2', icon: '🥈', bg: 'bg-slate-100/80 border-slate-300 dark:bg-slate-700/40 dark:border-slate-600', badge: 'bg-slate-300 text-slate-800' },
+            { rank: 'Rank 3', icon: '🥉', bg: 'bg-orange-100/80 border-orange-300 dark:bg-orange-950/40 dark:border-orange-800/50', badge: 'bg-amber-600 text-white' }
+        ];
 
-                top3.forEach((item, idx) => {
-                    const style = medals[idx] || medals[2];
-                    const isAchieve = item.avgPct >= 100;
+        top3.forEach((item, idx) => {
+            const style = medals[idx] || medals[2];
+            const isAchieve = item.avgPct >= 100;
 
-                    const div = document.createElement('div');
-                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
-                    
-                    div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">${style.icon}</span>
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
-                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
-                                </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
-                                    <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
-                                    <span>•</span>
-                                    <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
-                                </p>
-                            </div>
+            const div = document.createElement('div');
+            div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+            
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${style.icon}</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.rank}</span>
                         </div>
-                        <div class="text-right">
-                            <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-                                ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
-                            </div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
-                                Score: ${item.finalScore.toFixed(1)} pts
-                            </span>
-                        </div>
-                    `;
-                    topContainer.appendChild(div);
-                });
-            }
+                        <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
+                            <span>•</span>
+                            <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                        ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                        Score: ${item.finalScore.toFixed(1)} pts
+                    </span>
+                </div>
+            `;
+            topContainer.appendChild(div);
+        });
+    }
 
-            // Render Bottom 3
-            bottomContainer.innerHTML = '';
-            if (bottom3.length === 0) {
-                bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
-            } else {
-                bottom3.forEach((item, idx) => {
-                    const rankNum = bottom3.length - idx;
-                    const isAchieve = item.avgPct >= 100;
+    // Render Bottom 3
+    bottomContainer.innerHTML = '';
+    if (bottom3.length === 0) {
+        bottomContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Tidak ada data staff.</p>`;
+    } else {
+        // Menambahkan array style khusus untuk Bottom 3 agar langsung dikenali
+        const bottomStyles = [
+            { label: 'Terendah #1', icon: '🚩', bg: 'bg-rose-100/90 border-rose-400 dark:bg-rose-950/60 dark:border-rose-700', badge: 'bg-rose-600 text-white' },
+            { label: 'Terendah #2', icon: '📉', bg: 'bg-rose-50/80 border-rose-300 dark:bg-rose-900/40 dark:border-rose-800', badge: 'bg-rose-500 text-white' },
+            { label: 'Terendah #3', icon: '⚠️', bg: 'bg-orange-50/80 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/50', badge: 'bg-orange-500 text-white' }
+        ];
 
-                    const div = document.createElement('div');
-                    div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border border-rose-200/80 bg-rose-50/50 dark:bg-rose-950/20 dark:border-rose-900/50 shadow-sm`;
-                    
-                    div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-300 font-extrabold text-xs flex items-center justify-center border border-rose-300 dark:border-rose-700">
-                                #${rankNum}
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
-                                </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
-                                    <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
-                                    <span>•</span>
-                                    <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
-                                ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
-                            </div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
-                                Score: ${item.finalScore.toFixed(1)} pts
-                            </span>
-                        </div>
-                    `;
-                    bottomContainer.appendChild(div);
-                });
-            }
-        }
+        bottom3.forEach((item, idx) => {
+            const style = bottomStyles[idx] || bottomStyles[2];
+            const isAchieve = item.avgPct >= 100;
 
+            const div = document.createElement('div');
+            div.className = `lb-item flex items-center justify-between p-3.5 rounded-xl border ${style.bg} shadow-sm`;
+            
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${style.icon}</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${item.nama}</h4>
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${style.badge}">${style.label}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span>🛒 <strong>${item.totalTx}</strong> Trx</span>
+                            <span>•</span>
+                            <span>🕒 <strong>${item.totalShift}x</strong> Shift</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-base font-extrabold text-rose-600 dark:text-rose-400">
+                        ${item.avgUpt.toFixed(2)} <span class="text-[10px] font-semibold text-slate-400">UPT</span>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${isAchieve ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'}">
+                        Score: ${item.finalScore.toFixed(1)} pts
+                    </span>
+                </div>
+            `;
+            bottomContainer.appendChild(div);
+        });
+    }
+}
         /* RENDER PERINGKAT KESELURUHAN STAFF (MULAI RANK 4 DST) */
         function renderRestStaffTable(sortedStaff) {
             const tbody = document.getElementById('restStaffTableBody');
