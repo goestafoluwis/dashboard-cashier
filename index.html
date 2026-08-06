@@ -170,7 +170,12 @@
                 </div>
 
                 <!-- RIGHT CONTROLS -->
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Tombol Export Baru -->
+                    <button type="button" onclick="exportStaffToCSV()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md transition text-xs flex items-center gap-1">
+                        📥 Export Rekap (CSV)
+                    </button>
+                    
                     <a id="linkGoogleForm" href="#" target="_blank" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md transition text-xs flex items-center gap-1">
                         📝 Input Form
                     </a>
@@ -407,6 +412,11 @@
         const rawCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJVJ-O_ykP0Xfwzsq6smJaWfedrekL6-4i66U2cGCZJ6zMykNkAWlPqPJuuhYtMwohNcQcWw-03KmL/pubhtml";
         const GOOGLE_SHEET_CSV_URL = rawCsvUrl.replace('/pubhtml', '/pub?output=csv');
 
+        // VARIABEL GLOBAL UNTUK EXPORT DATA
+        let rawData = [];
+        let storeChartInstance = null;
+        let currentExportData = []; 
+
         window.onload = function() {
             let role = sessionStorage.getItem("userRole");
             if (!role) {
@@ -492,9 +502,6 @@
                 return { text: "Below Level 1", bg: "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300" };
             }
         }
-
-        let rawData = [];
-        let storeChartInstance = null;
 
         function initDashboard() {
             Papa.parse(GOOGLE_SHEET_CSV_URL, {
@@ -689,6 +696,19 @@
             const sortedStaff = [...aggregatedStaff].sort((a, b) => b.finalScore - a.finalScore);
             const top3Staff = sortedStaff.slice(0, 3);
             const bottom3Staff = sortedStaff.slice(-3).reverse();
+
+            // PERSIAPKAN DATA UNTUK EXPORT CSV
+            currentExportData = sortedStaff.map((s, index) => ({
+                "Rank": index + 1,
+                "Nama Staff": s.nama,
+                "Toko Terakhir": s.toko,
+                "Total Shift": s.totalShift,
+                "Total Qty": s.totalQty,
+                "Total Transaksi": s.totalTx,
+                "UPT Actual": s.avgUpt.toFixed(2),
+                "% Capaian Target": s.avgPct.toFixed(2) + "%",
+                "Final Composite Score": s.finalScore.toFixed(2)
+            }));
 
             // Urutkan Toko berdasarkan Persentase Capaian Toko
             const sortedStores = [...aggregatedStores].sort((a, b) => b.pctCapaian - a.pctCapaian);
@@ -1088,6 +1108,49 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        /* FUNGSI EXPORT DATA KE CSV */
+        function exportStaffToCSV() {
+            if (currentExportData.length === 0) {
+                alert("Tidak ada data untuk diekspor!");
+                return;
+            }
+
+            // Ambil header dari key object array pertama
+            const headers = Object.keys(currentExportData[0]);
+            const csvRows = [];
+
+            // Push baris header
+            csvRows.push(headers.join(','));
+
+            // Push baris data
+            for (const row of currentExportData) {
+                const values = headers.map(header => {
+                    const val = row[header];
+                    // Format escape untuk string agar tidak error jika ada koma di dalam teks
+                    return `"${String(val).replace(/"/g, '""')}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+
+            // Buat file Blob
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+
+            // Ambil bulan/tahun dari filter untuk nama file (jika ada)
+            const filterBulan = document.getElementById('filterBulanTahun').value || "Semua_Waktu";
+            const fileName = `Rekap_Performa_UPT_Staff_${filterBulan}.csv`;
+
+            // Trigger download
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', fileName);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         function updateRealtimeClock() {
