@@ -342,8 +342,8 @@
                     <h2 class="font-bold text-base flex items-center gap-2">
                         <span>🎖️</span> Peringkat Keseluruhan Staff (Rank 4+)
                     </h2>
-                    <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded-md">
-                        Bobot Skor: 60% Achievement UPT + 25% Trx + 15% Shift
+                    <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded-md" title="Konsistensi & Partisipasi dihitung terhadap rata-rata tim (bukan nilai tertinggi), agar staff shift sedikit/part-time tetap dinilai adil.">
+                        Bobot Skor (Fair): 65% Achievement UPT + 20% Konsistensi Trx/Shift + 15% Partisipasi Shift
                     </span>
                 </div>
                 <div class="overflow-x-auto">
@@ -669,11 +669,18 @@
                 staffGroup[d.nama].totalShift += 1; 
             });
 
-            // Cari nilai Max Shift & Max Transaksi untuk persentase pembobotan
-            const maxShift = Math.max(...Object.values(staffGroup).map(s => s.totalShift), 1);
-            const maxTx = Math.max(...Object.values(staffGroup).map(s => s.totalTx), 1);
+            // FAIR SCORING: Gunakan RATA-RATA TIM (bukan MAX) sebagai pembanding,
+            // supaya staff part-time / shift sedikit tidak dirugikan hanya karena
+            // kalah volume dari 1 staff dengan shift/transaksi terbanyak (outlier).
+            const staffArr = Object.values(staffGroup);
+            const teamAvgShift = staffArr.length > 0
+                ? staffArr.reduce((acc, s) => acc + s.totalShift, 0) / staffArr.length
+                : 1;
+            const teamAvgTxPerShift = staffArr.length > 0
+                ? staffArr.reduce((acc, s) => acc + (s.totalShift > 0 ? s.totalTx / s.totalShift : 0), 0) / staffArr.length
+                : 1;
 
-            const aggregatedStaff = Object.values(staffGroup).map(s => {
+            const aggregatedStaff = staffArr.map(s => {
                 const avgUpt = s.totalTx > 0 ? (s.totalQty / s.totalTx) : 0;
                 
                 // Rata-rata weighted Target UPT untuk kasir tersebut
@@ -681,13 +688,27 @@
                 
                 // % Achievement UPT Kasir vs Target Level 1 Toko
                 const avgPct = weightedTargetUpt > 0 ? ((avgUpt / weightedTargetUpt) * 100) : 0;
-                
-                // Menghitung bobot persentase relatif
-                const shiftPct = (s.totalShift / maxShift) * 100;
-                const txPct = (s.totalTx / maxTx) * 100;
 
-                // RUMUS: 60% Achievement UPT vs Target Toko + 25% Jumlah Trx + 15% Jumlah Shift
-                const finalScore = (avgPct * 0.6) + (txPct * 0.25) + (shiftPct * 0.15);
+                // Skor Kualitas: achievement UPT, di-cap 150% agar 1 shift outlier
+                // (misal 1x shift dengan hasil sangat tinggi) tidak mendominasi ranking.
+                const qualityScore = Math.min(avgPct, 150);
+
+                // Skor Konsistensi: rata-rata transaksi per shift, dibandingkan
+                // RATA-RATA TIM (bukan yang tertinggi) -> adil untuk staff part-time.
+                const txPerShift = s.totalShift > 0 ? (s.totalTx / s.totalShift) : 0;
+                const consistencyScore = teamAvgTxPerShift > 0
+                    ? Math.min((txPerShift / teamAvgTxPerShift) * 100, 150)
+                    : 0;
+
+                // Skor Partisipasi: jumlah shift dibandingkan RATA-RATA TIM (bukan max)
+                // -> staff dengan shift lebih sedikit tetap dapat skor wajar (~100)
+                // selama proporsional, tidak otomatis jatuh ke nilai kecil.
+                const participationScore = teamAvgShift > 0
+                    ? Math.min((s.totalShift / teamAvgShift) * 100, 150)
+                    : 0;
+
+                // RUMUS FAIR: 65% Kualitas UPT (Achievement) + 20% Konsistensi Trx/Shift + 15% Partisipasi Shift
+                const finalScore = (qualityScore * 0.65) + (consistencyScore * 0.20) + (participationScore * 0.15);
 
                 return { ...s, avgUpt, avgPct, finalScore };
             });
