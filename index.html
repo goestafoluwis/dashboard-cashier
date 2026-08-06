@@ -338,7 +338,7 @@
                         <span>🎖️</span> Peringkat Keseluruhan Staff (Rank 4+)
                     </h2>
                     <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded-md">
-                        Bobot Skor: 60% UPT + 25% Trx + 15% Shift
+                        Bobot Skor: 60% Achievement UPT + 25% Trx + 15% Shift
                     </span>
                 </div>
                 <div class="overflow-x-auto">
@@ -651,12 +651,14 @@
                         toko: d.toko, 
                         totalQty: 0, 
                         totalTx: 0, 
-                        avgTargetUpt: d.targetUpt,
+                        totalTargetQtyNeeded: 0, // Akumulasi ekspektasi Qty berdasarkan Target Level 1
                         totalShift: 0 
                     };
                 }
                 staffGroup[d.nama].totalQty += d.qty;
                 staffGroup[d.nama].totalTx += d.tx;
+                // Menghitung berapa total Qty yang seharusnya dicapai berdasarkan target level 1 toko
+                staffGroup[d.nama].totalTargetQtyNeeded += (d.tx * d.targetUpt);
                 staffGroup[d.nama].totalShift += 1; 
             });
 
@@ -666,13 +668,18 @@
 
             const aggregatedStaff = Object.values(staffGroup).map(s => {
                 const avgUpt = s.totalTx > 0 ? (s.totalQty / s.totalTx) : 0;
-                const avgPct = s.avgTargetUpt > 0 ? ((avgUpt / s.avgTargetUpt) * 100) : 0;
+                
+                // Rata-rata weighted Target UPT untuk kasir tersebut
+                const weightedTargetUpt = s.totalTx > 0 ? (s.totalTargetQtyNeeded / s.totalTx) : 0;
+                
+                // % Achievement UPT Kasir vs Target Level 1 Toko
+                const avgPct = weightedTargetUpt > 0 ? ((avgUpt / weightedTargetUpt) * 100) : 0;
                 
                 // Menghitung bobot persentase relatif
                 const shiftPct = (s.totalShift / maxShift) * 100;
                 const txPct = (s.totalTx / maxTx) * 100;
 
-                // RUMUS: 60% UPT + 25% Jumlah Trx + 15% Jumlah Shift
+                // RUMUS: 60% Achievement UPT vs Target Toko + 25% Jumlah Trx + 15% Jumlah Shift
                 const finalScore = (avgPct * 0.6) + (txPct * 0.25) + (shiftPct * 0.15);
 
                 return { ...s, avgUpt, avgPct, finalScore };
